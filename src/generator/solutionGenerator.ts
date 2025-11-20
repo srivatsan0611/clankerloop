@@ -21,8 +21,16 @@ export async function generateSolution(
     schema: z.object({
       code: z.string().describe('Complete, working solution code'),
       explanation: z.string().describe('Explanation of the approach and algorithm'),
-      timeComplexity: z.string().describe('Time complexity analysis (e.g., O(n), O(n log n))'),
-      spaceComplexity: z.string().describe('Space complexity analysis (e.g., O(1), O(n))'),
+      timeComplexity: z
+        .string()
+        .describe(
+          'Time complexity analysis (e.g., O(n), O(n log n)). Keep it concise and to the point, just the big O notation.',
+        ),
+      spaceComplexity: z
+        .string()
+        .describe(
+          'Space complexity analysis (e.g., O(1), O(n)). Keep it concise and to the point, just the big O notation.',
+        ),
     }),
     prompt,
   });

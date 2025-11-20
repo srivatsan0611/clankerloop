@@ -1,13 +1,14 @@
 import { readFile } from 'fs/promises';
 
+import { closeConnection } from '../db/index.js';
+import { getProblemPackage } from '../db/repositories/index.js';
 import { createTestRunner } from '../executor/index.js';
-import { ProblemPackageSchema } from '../types/index.js';
 import { formatTestResults, showProgress, showSuccess, showError } from '../utils/index.js';
 
-import type { ProblemPackage, Language } from '../types/index.js';
+import type { Language } from '../types/index.js';
 
 export interface SolveOptions {
-  problemFile: string;
+  problemId: string;
   solutionFile: string;
   language: Language;
   showHidden?: boolean;
@@ -17,14 +18,18 @@ export interface SolveOptions {
  * Test a user's solution against problem test cases
  */
 export async function solveCommand(options: SolveOptions): Promise<void> {
-  const { problemFile, solutionFile, language, showHidden = false } = options;
+  const { problemId, solutionFile, language, showHidden = false } = options;
 
   try {
-    showProgress('Loading problem package');
+    showProgress('Loading problem package from database');
 
-    // Load problem package
-    const problemData = await readFile(problemFile, 'utf-8');
-    const problemPackage: ProblemPackage = ProblemPackageSchema.parse(JSON.parse(problemData));
+    // Load problem package from database
+    const problemPackage = await getProblemPackage(problemId);
+
+    if (!problemPackage) {
+      showError(`Problem not found: ${problemId}`);
+      process.exit(1);
+    }
 
     showProgress('Loading user solution');
 
@@ -84,5 +89,7 @@ export async function solveCommand(options: SolveOptions): Promise<void> {
     console.error('\n❌ Error testing solution:');
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
+  } finally {
+    await closeConnection();
   }
 }

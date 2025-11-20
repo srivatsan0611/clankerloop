@@ -2,22 +2,30 @@ import { describe, it, expect, beforeAll, beforeEach, afterEach, mock, spyOn } f
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
+import { createProblem, createTestCases } from '../../db/repositories/index.js';
 import { solveCommand } from '../solve.js';
 
 import type { ProblemPackage } from '../../types/index.js';
 
 const MOCK_DATA_DIR = join(process.cwd(), 'problem', 'TEST__GOOD_INPUTS');
 
-let _mockProblemPackage: ProblemPackage;
-let _correctSolution: string;
-let _wrongSolution: string;
+let testProblemId: string;
 
 beforeAll(async () => {
-  _mockProblemPackage = JSON.parse(
+  // Load mock data from JSON files
+  const mockProblemPackage: ProblemPackage = JSON.parse(
     await readFile(join(MOCK_DATA_DIR, 'problemPackage.json'), 'utf-8'),
   );
-  _correctSolution = await readFile(join(MOCK_DATA_DIR, 'mockSolution_correct.ts'), 'utf-8');
-  _wrongSolution = await readFile(join(MOCK_DATA_DIR, 'mockSolution_wrong.ts'), 'utf-8');
+
+  // Insert test data into the database
+  testProblemId = await createProblem(mockProblemPackage.problem);
+
+  // Combine sample and hidden test cases and insert them
+  const allTestCases = [
+    ...mockProblemPackage.sampleTestCases,
+    ...mockProblemPackage.hiddenTestCases,
+  ];
+  await createTestCases(testProblemId, allTestCases);
 });
 
 describe('solveCommand', () => {
@@ -54,7 +62,7 @@ describe('solveCommand', () => {
   it('should load problem package successfully', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -68,7 +76,7 @@ describe('solveCommand', () => {
   it('should load user solution successfully', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -82,7 +90,7 @@ describe('solveCommand', () => {
   it('should run sample test cases', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -96,7 +104,7 @@ describe('solveCommand', () => {
   it('should run hidden tests when all samples pass', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -110,7 +118,7 @@ describe('solveCommand', () => {
   it('should show success when all tests pass', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -126,7 +134,7 @@ describe('solveCommand', () => {
   it('should exit with code 1 when sample tests fail', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_wrong.ts'),
         language: 'typescript',
       });
@@ -140,7 +148,7 @@ describe('solveCommand', () => {
   it('should show hidden results when showHidden is true', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
         showHidden: true,
@@ -152,10 +160,10 @@ describe('solveCommand', () => {
     expect(consoleOutput.some((line) => line.includes('hidden test cases'))).toBe(true);
   });
 
-  it('should handle invalid problem file', async () => {
+  it('should handle invalid problem ID', async () => {
     try {
       await solveCommand({
-        problemFile: '/nonexistent/path/problem.json',
+        problemId: '00000000-0000-0000-0000-000000000000',
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -169,7 +177,7 @@ describe('solveCommand', () => {
   it('should handle invalid solution file', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: '/nonexistent/path/solution.ts',
         language: 'typescript',
       });
@@ -183,7 +191,7 @@ describe('solveCommand', () => {
   it('should display test results with PASS/FAIL', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -199,7 +207,7 @@ describe('solveCommand', () => {
   it('should include input and expected output in results', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });
@@ -215,7 +223,7 @@ describe('solveCommand', () => {
   it('should suggest fixing sample tests before running hidden', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_wrong.ts'),
         language: 'typescript',
       });
@@ -230,7 +238,7 @@ describe('solveCommand', () => {
   it('should show progress messages during execution', async () => {
     try {
       await solveCommand({
-        problemFile: join(MOCK_DATA_DIR, 'problemPackage.json'),
+        problemId: testProblemId,
         solutionFile: join(MOCK_DATA_DIR, 'mockSolution_correct.ts'),
         language: 'typescript',
       });

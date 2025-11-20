@@ -2,6 +2,7 @@ import { Command } from 'commander';
 
 import { generateCommand, type GenerateOptions } from './generate.js';
 import { solveCommand, type SolveOptions } from './solve.js';
+import app, { startServer } from '../api/index.js';
 
 import type { Difficulty, Language } from '../types/index.js';
 
@@ -28,7 +29,6 @@ export async function runCLI(args: string[]): Promise<void> {
     .option('--topic <string>', "Problem topic (e.g., 'arrays', 'dynamic programming')")
     .option('--tests <number>', 'Number of test cases to generate', '10')
     .option('--samples <number>', 'Number of sample test cases', '3')
-    .option('--output <file>', 'Save problem to JSON file')
     .action(async (options) => {
       const generateOptions: GenerateOptions = {
         model: options.model,
@@ -37,7 +37,6 @@ export async function runCLI(args: string[]): Promise<void> {
         topic: options.topic,
         numTestCases: parseInt(options.tests),
         numSamples: parseInt(options.samples),
-        output: options.output,
       };
 
       await generateCommand(generateOptions);
@@ -46,19 +45,34 @@ export async function runCLI(args: string[]): Promise<void> {
   program
     .command('solve')
     .description("Test a user's solution against problem test cases")
-    .requiredOption('--problem <file>', 'Path to problem JSON file')
+    .requiredOption('--problem <id>', 'Problem ID (UUID from database)')
     .requiredOption('--solution <file>', 'Path to solution file')
     .option('--language <lang>', 'Solution language: javascript, typescript, python', 'typescript')
     .option('--show-hidden', 'Show results of hidden test cases', false)
     .action(async (options) => {
       const solveOptions: SolveOptions = {
-        problemFile: options.problem,
+        problemId: options.problem,
         solutionFile: options.solution,
         language: options.language as Language,
         showHidden: options.showHidden,
       };
 
       await solveCommand(solveOptions);
+    });
+
+  program
+    .command('serve')
+    .description('Start the API server')
+    .option('--port <number>', 'Port to listen on', '3000')
+    .action(async (options) => {
+      const port = parseInt(options.port);
+      const server = startServer(port);
+
+      // Start the Bun server
+      Bun.serve({
+        port: server.port,
+        fetch: app.fetch,
+      });
     });
 
   await program.parseAsync(args, { from: 'user' });
