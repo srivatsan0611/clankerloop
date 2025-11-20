@@ -19,7 +19,7 @@ export async function createTempFile(content: string, extension: string): Promis
 export async function cleanupTempFile(filepath: string): Promise<void> {
   try {
     await unlink(filepath);
-  } catch (error) {
+  } catch {
     // Ignore errors during cleanup
     console.warn(`Failed to cleanup temp file: ${filepath}`);
   }
