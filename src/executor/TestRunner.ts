@@ -1,6 +1,7 @@
-import type { TestCase, TestResult, Language } from '../types/index.js';
 import { BaseExecutor } from './BaseExecutor.js';
 import { TEST_EXECUTION_CODE_TEMPLATE } from '../utils/index.js';
+
+import type { TestCase, TestResult, Language } from '../types/index.js';
 
 /**
  * Runs test cases against user solutions

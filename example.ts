@@ -5,8 +5,9 @@
  * which is useful when building a web UI or API server.
  */
 
-import { generateCompleteProblem } from './src/generator/index.js';
 import { createTestRunner } from './src/executor/index.js';
+import { generateCompleteProblem } from './src/generator/index.js';
+
 import type { Language } from './src/types/index.js';
 
 async function main() {

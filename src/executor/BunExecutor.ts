@@ -1,7 +1,9 @@
 import { spawn } from 'child_process';
+
 import { BaseExecutor } from './BaseExecutor.js';
-import type { ExecutionResult, Language } from '../types/index.js';
 import { createTempFile, cleanupTempFile, parseExecutionOutput } from '../utils/index.js';
+
+import type { ExecutionResult, Language } from '../types/index.js';
 
 /**
  * Executor for JavaScript and TypeScript using Bun runtime

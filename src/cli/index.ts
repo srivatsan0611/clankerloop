@@ -1,7 +1,9 @@
 import { Command } from 'commander';
-import type { Difficulty, Language } from '../types/index.js';
+
 import { generateCommand, type GenerateOptions } from './generate.js';
 import { solveCommand, type SolveOptions } from './solve.js';
+
+import type { Difficulty, Language } from '../types/index.js';
 
 export { generateCommand, solveCommand };
 export type { GenerateOptions, SolveOptions };

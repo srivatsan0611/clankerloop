@@ -1,7 +1,9 @@
 import { generateText } from 'ai';
-import type { Problem, TestCaseDescription, TestCaseInputCode, Language } from '../types/index.js';
+
 import { TestCaseInputCodeSchema } from '../types/index.js';
 import { TEST_CODE_GENERATION_PROMPT } from '../utils/index.js';
+
+import type { Problem, TestCaseDescription, TestCaseInputCode, Language } from '../types/index.js';
 
 /**
  * Generate executable code that produces test case input

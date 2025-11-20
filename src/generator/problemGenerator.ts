@@ -1,8 +1,10 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import type { Problem, Difficulty } from '../types/index.js';
+
 import { ProblemSchema } from '../types/index.js';
 import { PROBLEM_GENERATION_PROMPT } from '../utils/index.js';
+
+import type { Problem, Difficulty } from '../types/index.js';
 
 /**
  * Generate a coding problem using AI

@@ -1,8 +1,9 @@
-import type { Language } from '../types/index.js';
 import { BaseExecutor } from './BaseExecutor.js';
 import { BunExecutor } from './BunExecutor.js';
 import { PythonExecutor } from './PythonExecutor.js';
 import { TestRunner } from './TestRunner.js';
+
+import type { Language } from '../types/index.js';
 
 export { BaseExecutor, BunExecutor, PythonExecutor, TestRunner };
 

@@ -1,8 +1,10 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import type { Problem, Solution, TestCaseDescription } from '../types/index.js';
+
 import { TestCaseDescriptionSchema } from '../types/index.js';
 import { TEST_CASE_GENERATION_PROMPT } from '../utils/index.js';
+
+import type { Problem, Solution, TestCaseDescription } from '../types/index.js';
 
 /**
  * Generate test case descriptions (natural language) for a problem

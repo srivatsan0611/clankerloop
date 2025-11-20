@@ -1,8 +1,10 @@
 import { readFile } from 'fs/promises';
-import type { ProblemPackage, Language } from '../types/index.js';
-import { ProblemPackageSchema } from '../types/index.js';
+
 import { createTestRunner } from '../executor/index.js';
+import { ProblemPackageSchema } from '../types/index.js';
 import { formatTestResults, showProgress, showSuccess, showError } from '../utils/index.js';
+
+import type { ProblemPackage, Language } from '../types/index.js';
 
 export interface SolveOptions {
   problemFile: string;
