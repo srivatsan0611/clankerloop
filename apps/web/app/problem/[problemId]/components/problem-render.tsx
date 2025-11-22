@@ -11,10 +11,14 @@ import Loader from "@/components/client/loader";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   callGenerateProblemTextAtom,
+  callGenerateTestCasesAtom,
   getProblemTextAtom,
+  getTestCasesAtom,
   isProblemTextLoadingAtom,
+  isTestCasesLoadingAtom,
   problemIdAtom,
   problemTextAtom,
+  testCasesAtom,
 } from "@/atoms";
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
@@ -23,6 +27,11 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
   const problemText = useAtomValue(problemTextAtom);
   const callGenerateProblemText = useSetAtom(callGenerateProblemTextAtom);
   const getProblemText = useSetAtom(getProblemTextAtom);
+  const isTestCasesLoading = useAtomValue(isTestCasesLoadingAtom);
+  const testCases = useAtomValue(testCasesAtom);
+  const callGenerateTestCases = useSetAtom(callGenerateTestCasesAtom);
+  const getTestCases = useSetAtom(getTestCasesAtom);
+
   useEffect(() => {
     setProblemId(problemId);
   }, [problemId, setProblemId]);
@@ -30,6 +39,10 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
   useEffect(() => {
     getProblemText();
   }, [getProblemText, problemId]);
+
+  useEffect(() => {
+    getTestCases();
+  }, [getTestCases, problemId, problemText]);
 
   return (
     <div>
@@ -42,6 +55,25 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
           <Loader />
         ) : (
           problemText && <MessageResponse>{problemText}</MessageResponse>
+        )}
+      </div>
+      <div>
+        <Button variant={"outline"} onClick={() => callGenerateTestCases()}>
+          Generate Test Cases
+        </Button>
+        {isTestCasesLoading ? (
+          <Loader />
+        ) : (
+          testCases && (
+            <div>
+              {testCases.map((testCase) => (
+                <div key={testCase.description}>
+                  {testCase.description}
+                  {testCase.isEdgeCase ? " [Edge Case]" : ""}
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>
