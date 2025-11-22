@@ -6,28 +6,30 @@ import {
   getProblemText,
 } from "../actions/generate-problem-text";
 import { useCallback, useEffect, useState } from "react";
-import { Message, MessageResponse } from "@/components/ai-elements/message";
+import { MessageResponse } from "@/components/ai-elements/message";
 import Loader from "@/components/client/loader";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  callGenerateProblemTextAtom,
+  getProblemTextAtom,
+  isProblemTextLoadingAtom,
+  problemIdAtom,
+  problemTextAtom,
+} from "@/atoms";
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [problemText, setProblemText] = useState<string | null>(null);
+  const setProblemId = useSetAtom(problemIdAtom);
+  const isProblemTextLoading = useAtomValue(isProblemTextLoadingAtom);
+  const problemText = useAtomValue(problemTextAtom);
+  const callGenerateProblemText = useSetAtom(callGenerateProblemTextAtom);
+  const getProblemText = useSetAtom(getProblemTextAtom);
+  useEffect(() => {
+    setProblemId(problemId);
+  }, [problemId, setProblemId]);
 
   useEffect(() => {
-    const fetchProblemText = async () => {
-      const problemText = await getProblemText(problemId);
-      setProblemText(problemText);
-      setIsLoading(false);
-    };
-    fetchProblemText();
-  }, [problemId]);
-
-  const callGenerateProblemText = useCallback(async () => {
-    setIsLoading(true);
-    const newProblemText = await generateProblemText(problemId);
-    setIsLoading(false);
-    setProblemText(newProblemText);
-  }, [problemId]);
+    getProblemText();
+  }, [getProblemText, problemId]);
 
   return (
     <div>
@@ -36,7 +38,7 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
         <Button variant={"outline"} onClick={() => callGenerateProblemText()}>
           Generate Problem Text
         </Button>
-        {isLoading ? (
+        {isProblemTextLoading ? (
           <Loader />
         ) : (
           problemText && <MessageResponse>{problemText}</MessageResponse>
