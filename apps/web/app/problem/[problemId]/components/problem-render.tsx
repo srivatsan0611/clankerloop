@@ -48,6 +48,10 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
     getTestCases();
   }, [getTestCases, problemId, problemText]);
 
+  useEffect(() => {
+    getTestCaseInputs();
+  }, [getTestCaseInputs, problemId, testCases]);
+
   return (
     <div>
       <div>Problem: {problemId}</div>
@@ -79,8 +83,8 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
         ) : (
           testCases && (
             <div>
-              {testCases.map((testCase) => (
-                <div key={testCase.description}>
+              {testCases.map((testCase, i) => (
+                <div key={`testcase-description-${i}`}>
                   {testCase.description}
                   {testCase.isEdgeCase ? " [Edge Case]" : ""}
                 </div>
@@ -101,10 +105,8 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
         ) : (
           testCaseInputs && (
             <div>
-              {testCaseInputs.map((testCaseInput) => (
-                <div key={testCaseInput.inputCode}>
-                  {testCaseInput.inputCode}
-                </div>
+              {testCaseInputs.map((testCaseInput, i) => (
+                <div key={`testcase-input-${i}`}>{testCaseInput.inputCode}</div>
               ))}
             </div>
           )
