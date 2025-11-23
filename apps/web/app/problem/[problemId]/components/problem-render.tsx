@@ -7,13 +7,17 @@ import Loader from "@/components/client/loader";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   callGenerateProblemTextAtom,
+  callGenerateTestCaseInputsAtom,
   callGenerateTestCasesAtom,
   getProblemTextAtom,
+  getTestCaseInputsAtom,
   getTestCasesAtom,
   isProblemTextLoadingAtom,
+  isTestCaseInputsLoadingAtom,
   isTestCasesLoadingAtom,
   problemIdAtom,
   problemTextAtom,
+  testCaseInputsAtom,
   testCasesAtom,
 } from "@/atoms";
 
@@ -27,6 +31,10 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
   const testCases = useAtomValue(testCasesAtom);
   const callGenerateTestCases = useSetAtom(callGenerateTestCasesAtom);
   const getTestCases = useSetAtom(getTestCasesAtom);
+  const isTestCaseInputsLoading = useAtomValue(isTestCaseInputsLoadingAtom);
+  const testCaseInputs = useAtomValue(testCaseInputsAtom);
+  const callGenerateTestCaseInputs = useSetAtom(callGenerateTestCaseInputsAtom);
+  const getTestCaseInputs = useSetAtom(getTestCaseInputsAtom);
 
   useEffect(() => {
     setProblemId(problemId);
@@ -75,6 +83,27 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
                 <div key={testCase.description}>
                   {testCase.description}
                   {testCase.isEdgeCase ? " [Edge Case]" : ""}
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
+      <div>
+        <Button
+          variant={"outline"}
+          onClick={() => callGenerateTestCaseInputs()}
+        >
+          Generate Test Case Inputs
+        </Button>
+        {isTestCaseInputsLoading ? (
+          <Loader />
+        ) : (
+          testCaseInputs && (
+            <div>
+              {testCaseInputs.map((testCaseInput) => (
+                <div key={testCaseInput.inputCode}>
+                  {testCaseInput.inputCode}
                 </div>
               ))}
             </div>

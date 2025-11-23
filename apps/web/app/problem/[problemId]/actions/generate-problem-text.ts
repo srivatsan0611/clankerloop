@@ -26,8 +26,6 @@ export async function generateProblemText(problemId: string) {
     }),
   });
 
-  console.log("object", object);
-
   const problemsDir = join(process.cwd(), "problems");
   const problemFile = join(problemsDir, `${problemId}.json`);
 
