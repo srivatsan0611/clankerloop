@@ -20,6 +20,7 @@ import {
   testCaseInputsAtom,
   testCasesAtom,
 } from "@/atoms";
+import { runGenerateInput } from "../actions/run-sandbox-code";
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
   const setProblemId = useSetAtom(problemIdAtom);
@@ -111,6 +112,11 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
             </div>
           )
         )}
+      </div>
+      <div>
+        <Button variant={"outline"} onClick={() => runGenerateInput(problemId)}>
+          Run Generate Input
+        </Button>
       </div>
     </div>
   );

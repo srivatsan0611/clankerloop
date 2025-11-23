@@ -4,14 +4,13 @@ import { z } from "zod/v3";
 import { join } from "path";
 import { writeFile } from "fs/promises";
 import { readFile } from "fs/promises";
+import { DEFAULT_LANGUAGE } from "@/lib/consts";
 
 interface TestCase {
   description: string;
   isEdgeCase: boolean;
   inputCode?: string;
 }
-
-const DEFAULT_LANGUAGE = "typescript";
 
 export async function generateTestCaseInputs(problemId: string) {
   const problemsDir = join(process.cwd(), "problems");
@@ -35,7 +34,7 @@ export async function generateTestCaseInputs(problemId: string) {
 Problem: ${typeof problemText === "string" ? problemText : problemText.problemText || ""}
 
 Function Signature (${DEFAULT_LANGUAGE}):
-${functionSignature[DEFAULT_LANGUAGE]}
+${functionSignature.typescript}
 
 Test Cases:
 ${testCases.map((tc: TestCase, i: number) => `${i + 1}. ${tc.description}${tc.isEdgeCase ? " (edge case)" : ""}`).join("\n")}
@@ -69,7 +68,7 @@ function generateSolution() {
             inputCode: z
               .string()
               .describe(
-                `Executable ${DEFAULT_LANGUAGE} code that produces the test case input.`
+                `Executable ${DEFAULT_LANGUAGE} code that produces the test case input. NO COMMENTS OR OTHER TEXT. JUST THE CODE. DO NOT RETURN CONSTANTS YOURSELF, GENERATE CODE TO GENERATE THE CONSTANTS.`
               ),
           })
         )
