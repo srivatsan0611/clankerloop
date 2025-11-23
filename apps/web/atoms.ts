@@ -122,15 +122,15 @@ export const getCodeToGenerateTestCaseInputsAtom = atom(
 );
 
 export const isGenerateTestCaseInputsLoadingAtom = atom(false);
-export const testCaseInputsAtom = atom<object[] | null>(null);
+export const testCaseInputsAtom = atom<unknown[] | null>(null);
 
 export const callGenerateTestCaseInputsAtom = atom(null, async (get, set) => {
   const problemId = get(problemIdAtom);
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
-  set(isTestCaseInputsLoadingAtom, true);
+  set(isGenerateTestCaseInputsLoadingAtom, true);
   const testCaseInputs = await generateTestCaseInputs(problemId);
   set(testCaseInputsAtom, testCaseInputs);
-  set(isTestCaseInputsLoadingAtom, false);
+  set(isGenerateTestCaseInputsLoadingAtom, false);
 });

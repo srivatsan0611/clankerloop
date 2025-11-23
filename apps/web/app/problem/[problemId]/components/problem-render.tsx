@@ -21,6 +21,7 @@ import {
   testCaseInputCodeAtom,
   callGenerateTestCaseInputsAtom,
   isGenerateTestCaseInputsLoadingAtom,
+  callGenerateTestCaseInputCodeAtom,
 } from "@/atoms";
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
@@ -35,6 +36,9 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
   const getTestCases = useSetAtom(getTestCasesAtom);
   const isTestCaseInputsLoading = useAtomValue(isTestCaseInputsLoadingAtom);
   const testCaseInputCode = useAtomValue(testCaseInputCodeAtom);
+  const callGenerateTestCaseInputCode = useSetAtom(
+    callGenerateTestCaseInputCodeAtom
+  );
   const getCodeToGenerateTestCaseInputs = useSetAtom(
     getCodeToGenerateTestCaseInputsAtom
   );
@@ -104,7 +108,7 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
       <div>
         <Button
           variant={"outline"}
-          onClick={() => callGenerateTestCaseInputs()}
+          onClick={() => callGenerateTestCaseInputCode()}
         >
           Generate Test Case Inputs
         </Button>

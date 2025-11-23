@@ -15,12 +15,13 @@ export async function generateTestCaseInputs(problemId: string) {
   const results: unknown[] = [];
   for (const testCaseInputCode of testCasesInputCode) {
     // TODO: handle errors
-    await sandbox.run(
-      testCaseInputCode.code +
+    const result = await sandbox.run(
+      testCaseInputCode.inputCode +
         "; const output = generateTestInput();" +
         // Write the output to a file
         "require('fs').writeFileSync('output.json', JSON.stringify(output));"
     );
+    console.log("Result of running sandbox code:", result);
     results.push(JSON.parse(await sandbox.readFile("output.json")));
   }
 
@@ -51,5 +52,5 @@ export async function generateTestCaseInputs(problemId: string) {
     JSON.stringify({ ...problemData, testCases: updatedTestCases }, null, 2)
   );
 
-  return updatedTestCases;
+  return results;
 }
