@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useEffect } from "react";
 import { MessageResponse } from "@/components/ai-elements/message";
 import Loader from "@/components/client/loader";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   callGenerateProblemTextAtom,
   callGenerateTestCasesAtom,
@@ -38,6 +38,11 @@ import {
   isGenerateTestCaseOutputsLoadingAtom,
   testCaseOutputsAtom,
   testCaseOutputsErrorAtom,
+  isRunUserSolutionLoadingAtom,
+  userSolutionTestResultsAtom,
+  userSolutionErrorAtom,
+  callRunUserSolutionAtom,
+  userSolutionAtom,
 } from "@/atoms";
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
@@ -82,10 +87,21 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
     callGenerateTestCaseOutputsAtom
   );
   const getTestCaseOutputs = useSetAtom(getTestCaseOutputsAtom);
+  const isRunUserSolutionLoading = useAtomValue(isRunUserSolutionLoadingAtom);
+  const userSolutionError = useAtomValue(userSolutionErrorAtom);
+  const [userSolution, setUserSolution] = useAtom(userSolutionAtom);
+  const userSolutionTestResults = useAtomValue(userSolutionTestResultsAtom);
+  const callRunUserSolution = useSetAtom(callRunUserSolutionAtom);
 
   useEffect(() => {
     setProblemId(problemId);
   }, [problemId, setProblemId]);
+
+  useEffect(() => {
+    if (solution) {
+      setUserSolution(solution);
+    }
+  }, [solution, setUserSolution]);
 
   return (
     <div>
@@ -279,6 +295,38 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
           </>
         )}
       </div>
+      <div>
+        <Button variant={"outline"} onClick={() => callRunUserSolution()}>
+          Run User Solution
+        </Button>
+      </div>
+      {isRunUserSolutionLoading ? (
+        <Loader />
+      ) : (
+        <>
+          {userSolutionError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{userSolutionError.message}</AlertDescription>
+            </Alert>
+          )}
+          {userSolutionTestResults && (
+            <div>
+              {userSolutionTestResults.map((testResult, i) => (
+                <div key={`user-solution-test-result-${i}`}>
+                  {JSON.stringify({
+                    testCase: testResult.testCase.description,
+                    status: testResult.status,
+                    actual: testResult.actual,
+                    error: testResult.error,
+                    expected: testResult.testCase.expected,
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

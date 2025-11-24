@@ -23,6 +23,10 @@ import {
   generateTestCaseOutputs,
   getTestCaseOutputs,
 } from "./app/problem/[problemId]/actions/generate-test-case-outputs";
+import {
+  runUserSolution,
+  TestResult,
+} from "./app/problem/[problemId]/actions/run-user-solution";
 
 export const problemIdAtom = atom<string | null>(null);
 export const isProblemTextLoadingAtom = atom(false);
@@ -334,5 +338,38 @@ export const getTestCaseOutputsAtom = atom(null, async (get, set) => {
     );
   } finally {
     set(isGenerateTestCaseOutputsLoadingAtom, false);
+  }
+});
+
+/**
+ * User solution
+ */
+export const isRunUserSolutionLoadingAtom = atom(false);
+export const userSolutionErrorAtom = atom<Error | null>(null);
+export const userSolutionAtom = atom<string | null>(null);
+export const userSolutionTestResultsAtom = atom<TestResult[] | null>(null);
+export const callRunUserSolutionAtom = atom(null, async (get, set) => {
+  const problemId = get(problemIdAtom);
+  if (!problemId) {
+    set(userSolutionErrorAtom, new Error("Problem ID is not set"));
+    return;
+  }
+  const userSolution = get(userSolutionAtom);
+  if (!userSolution) {
+    set(userSolutionErrorAtom, new Error("User solution is not set"));
+    return;
+  }
+  set(userSolutionErrorAtom, null);
+  set(isRunUserSolutionLoadingAtom, true);
+  try {
+    const testResults = await runUserSolution(problemId, userSolution);
+    set(userSolutionTestResultsAtom, testResults);
+  } catch (error) {
+    set(
+      userSolutionErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isRunUserSolutionLoadingAtom, false);
   }
 });
