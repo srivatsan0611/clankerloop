@@ -1,6 +1,6 @@
 {
-  "id": "590bbc94-10b6-44c8-b435-6abf5941ac4b",
-  "prevId": "b96612bb-452e-4993-8126-ac288286b9e1",
+  "id": "9ae80d79-dd15-480a-b5d0-8f2772c2a6f4",
+  "prevId": "590bbc94-10b6-44c8-b435-6abf5941ac4b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -90,22 +90,29 @@
           "name": "input_code",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "input": {
           "name": "input",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "expected": {
           "name": "expected",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
