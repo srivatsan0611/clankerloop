@@ -26,6 +26,7 @@ import {
 
 export const problemIdAtom = atom<string | null>(null);
 export const isProblemTextLoadingAtom = atom(false);
+export const problemTextErrorAtom = atom<Error | null>(null);
 export const problemTextAtom = atom<{
   problemText: string;
   functionSignature: string;
@@ -40,10 +41,19 @@ export const callGenerateProblemTextAtom = atom(null, async (get, set) => {
     throw new Error("Problem ID is not set");
   }
   set(problemTextAtom, null);
+  set(problemTextErrorAtom, null);
   set(isProblemTextLoadingAtom, true);
-  const newProblemText = await generateProblemText(problemId);
-  set(problemTextAtom, newProblemText);
-  set(isProblemTextLoadingAtom, false);
+  try {
+    const newProblemText = await generateProblemText(problemId);
+    set(problemTextAtom, newProblemText);
+  } catch (error) {
+    set(
+      problemTextErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isProblemTextLoadingAtom, false);
+  }
 });
 
 /**
@@ -54,13 +64,23 @@ export const getProblemTextAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(problemTextErrorAtom, null);
   set(isProblemTextLoadingAtom, true);
-  const { problemText, functionSignature } = await getProblemText(problemId);
-  set(problemTextAtom, { problemText, functionSignature });
-  set(isProblemTextLoadingAtom, false);
+  try {
+    const { problemText, functionSignature } = await getProblemText(problemId);
+    set(problemTextAtom, { problemText, functionSignature });
+  } catch (error) {
+    set(
+      problemTextErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isProblemTextLoadingAtom, false);
+  }
 });
 
 export const isTestCasesLoadingAtom = atom(false);
+export const testCasesErrorAtom = atom<Error | null>(null);
 export const testCasesAtom = atom<
   { description: string; isEdgeCase: boolean }[] | null
 >(null);
@@ -74,10 +94,19 @@ export const callGenerateTestCasesAtom = atom(null, async (get, set) => {
     throw new Error("Problem ID is not set");
   }
   set(testCasesAtom, null);
+  set(testCasesErrorAtom, null);
   set(isTestCasesLoadingAtom, true);
-  const testCases = await generateTestCases(problemId);
-  set(testCasesAtom, testCases);
-  set(isTestCasesLoadingAtom, false);
+  try {
+    const testCases = await generateTestCases(problemId);
+    set(testCasesAtom, testCases);
+  } catch (error) {
+    set(
+      testCasesErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isTestCasesLoadingAtom, false);
+  }
 });
 
 /**
@@ -88,13 +117,23 @@ export const getTestCasesAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(testCasesErrorAtom, null);
   set(isTestCasesLoadingAtom, true);
-  const testCases = await getTestCases(problemId);
-  set(testCasesAtom, testCases);
-  set(isTestCasesLoadingAtom, false);
+  try {
+    const testCases = await getTestCases(problemId);
+    set(testCasesAtom, testCases);
+  } catch (error) {
+    set(
+      testCasesErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isTestCasesLoadingAtom, false);
+  }
 });
 
 export const isTestCaseInputsLoadingAtom = atom(false);
+export const testCaseInputCodeErrorAtom = atom<Error | null>(null);
 export const testCaseInputCodeAtom = atom<string[] | null>(null);
 
 /**
@@ -108,10 +147,19 @@ export const callGenerateTestCaseInputCodeAtom = atom(
       throw new Error("Problem ID is not set");
     }
     set(testCaseInputCodeAtom, null);
+    set(testCaseInputCodeErrorAtom, null);
     set(isTestCaseInputsLoadingAtom, true);
-    const testCaseInputs = await generateTestCaseInputCode(problemId);
-    set(testCaseInputCodeAtom, testCaseInputs);
-    set(isTestCaseInputsLoadingAtom, false);
+    try {
+      const testCaseInputs = await generateTestCaseInputCode(problemId);
+      set(testCaseInputCodeAtom, testCaseInputs);
+    } catch (error) {
+      set(
+        testCaseInputCodeErrorAtom,
+        error instanceof Error ? error : new Error(String(error))
+      );
+    } finally {
+      set(isTestCaseInputsLoadingAtom, false);
+    }
   }
 );
 
@@ -125,10 +173,19 @@ export const getCodeToGenerateTestCaseInputsAtom = atom(
     if (!problemId) {
       throw new Error("Problem ID is not set");
     }
+    set(testCaseInputCodeErrorAtom, null);
     set(isTestCaseInputsLoadingAtom, true);
-    const testCaseInputs = await getTestCaseInputCode(problemId);
-    set(testCaseInputCodeAtom, testCaseInputs);
-    set(isTestCaseInputsLoadingAtom, false);
+    try {
+      const testCaseInputs = await getTestCaseInputCode(problemId);
+      set(testCaseInputCodeAtom, testCaseInputs);
+    } catch (error) {
+      set(
+        testCaseInputCodeErrorAtom,
+        error instanceof Error ? error : new Error(String(error))
+      );
+    } finally {
+      set(isTestCaseInputsLoadingAtom, false);
+    }
   }
 );
 
@@ -136,6 +193,7 @@ export const getCodeToGenerateTestCaseInputsAtom = atom(
  * Generate test case inputs from test case input code
  */
 export const isGenerateTestCaseInputsLoadingAtom = atom(false);
+export const testCaseInputsErrorAtom = atom<Error | null>(null);
 export const testCaseInputsAtom = atom<unknown[] | null>(null);
 
 export const callGenerateTestCaseInputsAtom = atom(null, async (get, set) => {
@@ -143,10 +201,19 @@ export const callGenerateTestCaseInputsAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(testCaseInputsErrorAtom, null);
   set(isGenerateTestCaseInputsLoadingAtom, true);
-  const testCaseInputs = await generateTestCaseInputs(problemId);
-  set(testCaseInputsAtom, testCaseInputs);
-  set(isGenerateTestCaseInputsLoadingAtom, false);
+  try {
+    const testCaseInputs = await generateTestCaseInputs(problemId);
+    set(testCaseInputsAtom, testCaseInputs);
+  } catch (error) {
+    set(
+      testCaseInputsErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateTestCaseInputsLoadingAtom, false);
+  }
 });
 
 /**
@@ -157,26 +224,45 @@ export const getTestCaseInputsAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(testCaseInputsErrorAtom, null);
   set(isGenerateTestCaseInputsLoadingAtom, true);
-  const testCaseInputs = await getTestCaseInputs(problemId);
-  set(testCaseInputsAtom, testCaseInputs);
-  set(isGenerateTestCaseInputsLoadingAtom, false);
+  try {
+    const testCaseInputs = await getTestCaseInputs(problemId);
+    set(testCaseInputsAtom, testCaseInputs);
+  } catch (error) {
+    set(
+      testCaseInputsErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateTestCaseInputsLoadingAtom, false);
+  }
 });
 
 /**
  * Generate solution
  */
 export const isGenerateSolutionLoadingAtom = atom(false);
+export const solutionErrorAtom = atom<Error | null>(null);
 export const solutionAtom = atom<string | null>(null);
 export const callGenerateSolutionAtom = atom(null, async (get, set) => {
   const problemId = get(problemIdAtom);
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(solutionErrorAtom, null);
   set(isGenerateSolutionLoadingAtom, true);
-  const solution = await generateSolution(problemId);
-  set(solutionAtom, solution);
-  set(isGenerateSolutionLoadingAtom, false);
+  try {
+    const solution = await generateSolution(problemId);
+    set(solutionAtom, solution);
+  } catch (error) {
+    set(
+      solutionErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateSolutionLoadingAtom, false);
+  }
 });
 
 /**
@@ -187,26 +273,45 @@ export const getSolutionAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(solutionErrorAtom, null);
   set(isGenerateSolutionLoadingAtom, true);
-  const solution = await getSolution(problemId);
-  set(solutionAtom, solution);
-  set(isGenerateSolutionLoadingAtom, false);
+  try {
+    const solution = await getSolution(problemId);
+    set(solutionAtom, solution);
+  } catch (error) {
+    set(
+      solutionErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateSolutionLoadingAtom, false);
+  }
 });
 
 /**
  * Generate test case outputs
  */
 export const isGenerateTestCaseOutputsLoadingAtom = atom(false);
+export const testCaseOutputsErrorAtom = atom<Error | null>(null);
 export const testCaseOutputsAtom = atom<unknown[] | null>(null);
 export const callGenerateTestCaseOutputsAtom = atom(null, async (get, set) => {
   const problemId = get(problemIdAtom);
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(testCaseOutputsErrorAtom, null);
   set(isGenerateTestCaseOutputsLoadingAtom, true);
-  const testCaseOutputs = await generateTestCaseOutputs(problemId);
-  set(testCaseOutputsAtom, testCaseOutputs);
-  set(isGenerateTestCaseOutputsLoadingAtom, false);
+  try {
+    const testCaseOutputs = await generateTestCaseOutputs(problemId);
+    set(testCaseOutputsAtom, testCaseOutputs);
+  } catch (error) {
+    set(
+      testCaseOutputsErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateTestCaseOutputsLoadingAtom, false);
+  }
 });
 
 /**
@@ -217,8 +322,17 @@ export const getTestCaseOutputsAtom = atom(null, async (get, set) => {
   if (!problemId) {
     throw new Error("Problem ID is not set");
   }
+  set(testCaseOutputsErrorAtom, null);
   set(isGenerateTestCaseOutputsLoadingAtom, true);
-  const testCaseOutputs = await getTestCaseOutputs(problemId);
-  set(testCaseOutputsAtom, testCaseOutputs);
-  set(isGenerateTestCaseOutputsLoadingAtom, false);
+  try {
+    const testCaseOutputs = await getTestCaseOutputs(problemId);
+    set(testCaseOutputsAtom, testCaseOutputs);
+  } catch (error) {
+    set(
+      testCaseOutputsErrorAtom,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  } finally {
+    set(isGenerateTestCaseOutputsLoadingAtom, false);
+  }
 });
