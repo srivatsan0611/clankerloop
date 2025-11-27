@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "wrangler dev",
     "start": "bun run src/index.ts",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit"
@@ -17,6 +17,7 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/bun": "latest",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "wrangler": "^4.51.0"
   }
 }

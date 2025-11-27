@@ -68,11 +68,8 @@ app.notFound((c) => {
   );
 });
 
-const port = parseInt(process.env.PORT || "3001", 10);
-
-console.log(`Backend server starting on port ${port}`);
-
+// Cloudflare Workers export format
+// Workers don't use ports - they're invoked via fetch events
 export default {
-  port,
   fetch: app.fetch,
 };
