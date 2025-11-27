@@ -1,9 +1,7 @@
 import { Daytona } from "@daytonaio/sdk";
+import type { SandboxConfig } from "./types";
 
-// Initialize the Daytona client
-const daytona = new Daytona({ apiKey: process.env.DAYTONA_API_KEY });
-
-type SandboxInstance = Awaited<ReturnType<typeof daytona.create>>;
+type SandboxInstance = Awaited<ReturnType<Daytona["create"]>>;
 
 export class Sandbox {
   private sandbox: SandboxInstance;
@@ -12,7 +10,11 @@ export class Sandbox {
     this.sandbox = sandbox;
   }
 
-  static async create(language: string): Promise<Sandbox> {
+  static async create(
+    language: string,
+    config: SandboxConfig
+  ): Promise<Sandbox> {
+    const daytona = new Daytona({ apiKey: config.apiKey });
     const sandboxInstance = await daytona.create({ language });
     return new Sandbox(sandboxInstance);
   }
