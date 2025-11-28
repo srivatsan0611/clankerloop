@@ -20,9 +20,18 @@ import {
   useTestCaseOutputs,
   useRunUserSolution,
 } from "@/hooks/use-problem";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function getStartingCode(language: string, functionSignature: string) {
+  if (language === "typescript") {
+    return `function runSolution${functionSignature} {\n\treturn;\n}`;
+  }
+  throw new Error(`Unsupported language: ${language}`);
+}
 
 export default function ProblemRender({ problemId }: { problemId: string }) {
   const [userSolution, setUserSolution] = useState<string | null>(null);
+  const [language, _setLanguage] = useState<string>("typescript");
 
   const {
     isLoading: isProblemTextLoading,
@@ -31,6 +40,16 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
     getData: getProblemText,
     generateData: callGenerateProblemText,
   } = useProblemText(problemId);
+
+  useEffect(() => {
+    if (!problemText) getProblemText();
+  }, [getProblemText, problemText]);
+
+  useEffect(() => {
+    if (problemText) {
+      setUserSolution(getStartingCode(language, problemText.functionSignature));
+    }
+  }, [problemText, language]);
 
   const {
     isLoading: isTestCasesLoading,
@@ -123,9 +142,6 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
                     <>
                       <MessageResponse>
                         {problemText.problemText}
-                      </MessageResponse>
-                      <MessageResponse>
-                        {problemText.functionSignature}
                       </MessageResponse>
                     </>
                   )}
@@ -345,15 +361,23 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={50} className="bg-blue-100">
-          <Editor
-            height="100%"
-            width="100%"
-            //   theme="vs-dark"
-            defaultLanguage="typescript"
-            value={userSolution ?? ""}
-            onChange={(value) => setUserSolution(value ?? null)}
-          />
+        <ResizablePanel defaultSize={50}>
+          {userSolution ? (
+            <Editor
+              height="100%"
+              width="100%"
+              //   theme="vs-dark"
+              defaultLanguage={language}
+              value={userSolution ?? ""}
+              onChange={(value) => setUserSolution(value ?? null)}
+              options={{
+                fontSize: 14,
+              }}
+              loading={<Skeleton className="h-full w-full" />}
+            />
+          ) : (
+            <Skeleton className="h-full w-full" />
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
