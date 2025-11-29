@@ -16,6 +16,7 @@ import {
   runUserSolution,
   type SandboxConfig,
 } from "@/problem-actions";
+import { getSandbox, proxyToSandbox, type Sandbox } from "@cloudflare/sandbox";
 
 const problems = new Hono<{ Bindings: Env }>();
 
