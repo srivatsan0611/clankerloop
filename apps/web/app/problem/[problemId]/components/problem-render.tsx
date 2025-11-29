@@ -351,6 +351,7 @@ export default function ProblemRender({ problemId }: { problemId: string }) {
                           actual: testResult.actual,
                           error: testResult.error,
                           expected: testResult.testCase.expected,
+                          stdout: testResult.stdout,
                         })}
                       </div>
                     ))}

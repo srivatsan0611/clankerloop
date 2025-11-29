@@ -11,6 +11,7 @@ export type TestResult = {
   status: "pass" | "fail" | "error";
   actual: unknown | null;
   error?: string;
+  stdout?: string;
 };
 
 export async function runUserSolution(
