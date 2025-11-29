@@ -1,6 +1,7 @@
 export interface ExecuteCommandResult {
   exitCode: number;
   stdout: string;
+  stderr: string;
 }
 
 interface CloudflareExecResult {
@@ -74,6 +75,7 @@ export class Sandbox {
     return {
       exitCode: result.exitCode,
       stdout: result.stdout,
+      stderr: result.stderr,
     };
   }
 }

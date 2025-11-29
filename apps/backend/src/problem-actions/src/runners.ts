@@ -4,30 +4,122 @@ import type { SupportedLanguage, LanguageConfig } from "./types";
 export const TS_RUNNER = `
 import * as fs from 'fs';
 import { runSolution } from './solution';
-const input = JSON.parse(fs.readFileSync(process.argv[process.argv.length - 1], 'utf-8'));
-const result = runSolution(...input);
-console.log(JSON.stringify(result));
+
+const outputPath = './output.json';
+let stdout = '';
+
+// Capture stdout
+const originalWrite = process.stdout.write.bind(process.stdout);
+process.stdout.write = function(chunk: any, ...args: any[]) {
+  stdout += chunk.toString();
+  return originalWrite(chunk, ...args);
+};
+
+try {
+  const input = JSON.parse(fs.readFileSync(process.argv[process.argv.length - 1], 'utf-8'));
+  const result = runSolution(...input);
+  fs.writeFileSync(outputPath, JSON.stringify({
+    success: true,
+    result: result,
+    stdout: stdout
+  }));
+} catch (error: any) {
+  const errorMessage = error?.message || String(error);
+  const trace = error?.stack || '';
+  fs.writeFileSync(outputPath, JSON.stringify({
+    success: false,
+    error: errorMessage,
+    trace: trace,
+    stdout: stdout
+  }));
+  // Exit with code 0 so main code can read output.json and handle the error
+}
 `.trim();
 
 // JavaScript runner template (same as TypeScript for Node.js)
 export const JS_RUNNER = `
 const { runSolution } = require('./solution');
 const fs = require('fs');
-const input = JSON.parse(fs.readFileSync(process.argv[2], 'utf-8'));
-const result = runSolution(...input);
-console.log(JSON.stringify(result));
+
+const outputPath = './output.json';
+let stdout = '';
+
+// Capture stdout
+const originalWrite = process.stdout.write.bind(process.stdout);
+process.stdout.write = function(chunk, ...args) {
+  stdout += chunk.toString();
+  return originalWrite(chunk, ...args);
+};
+
+try {
+  const input = JSON.parse(fs.readFileSync(process.argv[2], 'utf-8'));
+  const result = runSolution(...input);
+  fs.writeFileSync(outputPath, JSON.stringify({
+    success: true,
+    result: result,
+    stdout: stdout
+  }));
+} catch (error) {
+  const errorMessage = error?.message || String(error);
+  const trace = error?.stack || '';
+  fs.writeFileSync(outputPath, JSON.stringify({
+    success: false,
+    error: errorMessage,
+    trace: trace,
+    stdout: stdout
+  }));
+  // Exit with code 0 so main code can read output.json and handle the error
+}
 `.trim();
 
 // Python runner template
 export const PY_RUNNER = `
 import sys
 import json
+import io
+import traceback
 from solution import run_solution
 
-with open(sys.argv[1]) as f:
-    input_data = json.load(f)
-result = run_solution(*input_data)
-print(json.dumps(result))
+output_path = './output.json'
+stdout_capture = io.StringIO()
+
+# Capture stdout
+class StdoutCapture:
+    def __init__(self):
+        self.original_stdout = sys.stdout
+        self.captured = ''
+    
+    def write(self, text):
+        self.captured += text
+        self.original_stdout.write(text)
+    
+    def flush(self):
+        self.original_stdout.flush()
+
+stdout_capture_obj = StdoutCapture()
+sys.stdout = stdout_capture_obj
+
+try:
+    with open(sys.argv[1]) as f:
+        input_data = json.load(f)
+    result = run_solution(*input_data)
+    with open(output_path, 'w') as f:
+        json.dump({
+            'success': True,
+            'result': result,
+            'stdout': stdout_capture_obj.captured
+        }, f)
+except Exception as e:
+    error_message = str(e)
+    trace = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+    with open(output_path, 'w') as f:
+        json.dump({
+            'success': False,
+            'error': error_message,
+            'trace': trace,
+            'stdout': stdout_capture_obj.captured
+        }, f)
+    # Exit with code 0 so main code can read output.json and handle the error
 `.trim();
 
 export const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {

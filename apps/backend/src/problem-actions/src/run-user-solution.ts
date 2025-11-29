@@ -64,38 +64,80 @@ export async function runUserSolution(
         const command = `${config.runCommand} runner.${config.extension} input.json`;
         const result = await sandbox.executeCommand(command, WORK_DIR);
         console.log("result", JSON.stringify(result, null, 2));
+        
+        const outputPath = `${WORK_DIR}/output.json`;
+        
+        // If exitCode !== 0, treat as runner execution failure
         if (result.exitCode !== 0) {
-          // Non-zero exit code indicates an error
-          const errorMessage = result.stdout || "Execution failed";
           results.push({
             testCase,
             status: "error",
             actual: null,
-            error: errorMessage,
+            error: "Execution failed. Please abide by the given function signature and structure.",
           });
           continue;
         }
-        // Parse stdout as JSON for the result
-        const stdout = result.stdout.trim();
-        let actualOutput: unknown;
+        
+        // Try to read output.json
+        let outputData: {
+          success: boolean;
+          result?: unknown;
+          error?: string;
+          trace?: string;
+          stdout?: string;
+        };
+        
         try {
-          actualOutput = JSON.parse(stdout);
+          const outputContent = await sandbox.readFile(outputPath);
+          outputData = JSON.parse(outputContent);
         } catch {
+          // If output.json doesn't exist or is malformed, treat as runner execution failure
           results.push({
             testCase,
             status: "error",
             actual: null,
-            error: `Failed to parse output as JSON: ${stdout}`,
+            error: "Execution failed. Please abide by the given function signature and structure.",
           });
           continue;
         }
-        const actualStr = JSON.stringify(actualOutput);
-        const expectedStr = JSON.stringify(testCase.expected);
-        const status = actualStr === expectedStr ? "pass" : "fail";
+        
+        // Handle user code error (success === false)
+        if (outputData.success === false) {
+          const errorMessage = outputData.error || "Unknown error";
+          const trace = outputData.trace || "";
+          const errorWithTrace = trace
+            ? `${errorMessage}\n\n${trace}`
+            : errorMessage;
+          results.push({
+            testCase,
+            status: "error",
+            actual: null,
+            error: errorWithTrace,
+            stdout: outputData.stdout,
+          });
+          continue;
+        }
+        
+        // Handle success (success === true)
+        if (outputData.success === true && outputData.result !== undefined) {
+          const actualStr = JSON.stringify(outputData.result);
+          const expectedStr = JSON.stringify(testCase.expected);
+          const status = actualStr === expectedStr ? "pass" : "fail";
+          results.push({
+            testCase,
+            status,
+            actual: outputData.result,
+            stdout: outputData.stdout,
+          });
+          continue;
+        }
+        
+        // Unexpected output format
         results.push({
           testCase,
-          status,
-          actual: actualOutput,
+          status: "error",
+          actual: null,
+          error: "Execution failed. Please abide by the given function signature and structure.",
         });
       } catch (error) {
         results.push({
