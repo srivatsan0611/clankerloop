@@ -50,7 +50,6 @@ export async function runUserSolution(
     // Upload runner file
     await sandbox.uploadFile(Buffer.from(runnerTemplate, "utf-8"), runnerPath);
     for (let index = 0; index < testCases.length; index++) {
-      if (index > 0) break;
       const testCase = testCases[index];
       if (!testCase) {
         throw new Error(`Test case at index ${index} is undefined`);
@@ -64,20 +63,21 @@ export async function runUserSolution(
         const command = `${config.runCommand} runner.${config.extension} input.json`;
         const result = await sandbox.executeCommand(command, WORK_DIR);
         console.log("result", JSON.stringify(result, null, 2));
-        
+
         const outputPath = `${WORK_DIR}/output.json`;
-        
+
         // If exitCode !== 0, treat as runner execution failure
         if (result.exitCode !== 0) {
           results.push({
             testCase,
             status: "error",
             actual: null,
-            error: "Execution failed. Please abide by the given function signature and structure.",
+            error:
+              "Execution failed. Please abide by the given function signature and structure.",
           });
           continue;
         }
-        
+
         // Try to read output.json
         let outputData: {
           success: boolean;
@@ -86,7 +86,7 @@ export async function runUserSolution(
           trace?: string;
           stdout?: string;
         };
-        
+
         try {
           const outputContent = await sandbox.readFile(outputPath);
           outputData = JSON.parse(outputContent);
@@ -96,11 +96,12 @@ export async function runUserSolution(
             testCase,
             status: "error",
             actual: null,
-            error: "Execution failed. Please abide by the given function signature and structure.",
+            error:
+              "Execution failed. Please abide by the given function signature and structure.",
           });
           continue;
         }
-        
+
         // Handle user code error (success === false)
         if (outputData.success === false) {
           const errorMessage = outputData.error || "Unknown error";
@@ -117,7 +118,7 @@ export async function runUserSolution(
           });
           continue;
         }
-        
+
         // Handle success (success === true)
         if (outputData.success === true && outputData.result !== undefined) {
           const actualStr = JSON.stringify(outputData.result);
@@ -131,13 +132,14 @@ export async function runUserSolution(
           });
           continue;
         }
-        
+
         // Unexpected output format
         results.push({
           testCase,
           status: "error",
           actual: null,
-          error: "Execution failed. Please abide by the given function signature and structure.",
+          error:
+            "Execution failed. Please abide by the given function signature and structure.",
         });
       } catch (error) {
         results.push({
