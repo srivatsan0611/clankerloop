@@ -3,7 +3,11 @@ import { z } from "zod/v3";
 import { DEFAULT_LANGUAGE } from "./constants";
 import { getProblem, updateProblem, type TestCase } from "@repo/db";
 
-export async function generateSolution(problemId: string) {
+export async function generateSolution(
+  problemId: string,
+  model: string,
+  updateProblemInDb: boolean = true
+) {
   const { problemText, functionSignature, testCases } =
     await getProblem(problemId);
 
@@ -14,7 +18,7 @@ export async function generateSolution(problemId: string) {
   }
 
   const { object } = await generateObject({
-    model: "google/gemini-2.5-flash",
+    model,
     prompt: `Generate executable ${DEFAULT_LANGUAGE} code that solves the following problem.
 
 Problem: ${problemText}
@@ -39,7 +43,9 @@ THE FUNCTION NAME MUST BE runSolution.
 
   const solution = object.solution;
 
-  await updateProblem(problemId, { solution });
+  if (updateProblemInDb) {
+    await updateProblem(problemId, { solution });
+  }
 
   return solution;
 }

@@ -19,7 +19,7 @@ export async function handleQueueBatch(
   env: Env
 ): Promise<void> {
   for (const message of batch.messages) {
-    const { jobId, problemId, step } = message.body;
+    const { jobId, problemId, step, model } = message.body;
 
     console.log(`[Queue] Processing ${step} for problem ${problemId}`);
 
@@ -28,7 +28,7 @@ export async function handleQueueBatch(
       await updateJobStatus(jobId, "in_progress", step);
 
       // Execute the step
-      await executeStep(step, problemId, env);
+      await executeStep(step, problemId, env, model);
 
       // Mark step complete
       await markStepComplete(jobId, step);
@@ -40,6 +40,7 @@ export async function handleQueueBatch(
           jobId,
           problemId,
           step: nextStep,
+          model,
         });
         console.log(`[Queue] Enqueued ${nextStep} for problem ${problemId}`);
       } else {
@@ -63,8 +64,13 @@ export async function handleQueueBatch(
 async function executeStep(
   step: GenerationStep,
   problemId: string,
-  env: Env
+  env: Env,
+  model: string
 ): Promise<void> {
+  if (!model) {
+    throw new Error("Model is required for generation steps");
+  }
+
   const getSandboxInstance = (id: string): Sandbox => {
     const cloudflareSandbox = getSandbox(env.Sandbox, id);
     return new Sandbox(cloudflareSandbox);
@@ -72,13 +78,13 @@ async function executeStep(
 
   switch (step) {
     case "generateProblemText":
-      await generateProblemText(problemId);
+      await generateProblemText(problemId, model);
       break;
     case "generateTestCases":
-      await generateTestCases(problemId);
+      await generateTestCases(problemId, model);
       break;
     case "generateTestCaseInputCode":
-      await generateTestCaseInputCode(problemId);
+      await generateTestCaseInputCode(problemId, model);
       break;
     case "generateTestCaseInputs":
       await generateTestCaseInputs(
@@ -87,7 +93,7 @@ async function executeStep(
       );
       break;
     case "generateSolution":
-      await generateSolution(problemId);
+      await generateSolution(problemId, model);
       break;
     case "generateTestCaseOutputs":
       await generateTestCaseOutputs(

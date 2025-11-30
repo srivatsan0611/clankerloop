@@ -3,7 +3,10 @@ import { z } from "zod/v3";
 import { DEFAULT_LANGUAGE } from "./constants";
 import { getProblem, updateTestCase, type TestCase } from "@repo/db";
 
-export async function generateTestCaseInputCode(problemId: string) {
+export async function generateTestCaseInputCode(
+  problemId: string,
+  model: string
+) {
   const { problemText, functionSignature, testCases } =
     await getProblem(problemId);
 
@@ -14,7 +17,7 @@ export async function generateTestCaseInputCode(problemId: string) {
   }
 
   const { object } = await generateObject({
-    model: "google/gemini-2.5-flash",
+    model,
     prompt: `Generate executable ${DEFAULT_LANGUAGE} code that produces the input for test cases.
 
 Problem: ${problemText}
