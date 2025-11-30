@@ -126,14 +126,20 @@ export default function ProblemRender({
           <Button variant={"outline"} className="hover:cursor-pointer">
             Problems
           </Button>
-        </Link>
-        <Button
-          variant={"outline"}
-          className="hover:cursor-pointer"
-          onClick={() => signOutAction()}
+        </Link>{" "}
+        <form
+          action={async () => {
+            await signOutAction();
+          }}
         >
-          Logout
-        </Button>
+          <Button
+            variant={"outline"}
+            className="hover:cursor-pointer"
+            type="submit"
+          >
+            Sign out
+          </Button>
+        </form>
       </div>
       <ResizablePanelGroup direction="horizontal" className="h-full w-full">
         <ResizablePanel defaultSize={20} className="h-full">
