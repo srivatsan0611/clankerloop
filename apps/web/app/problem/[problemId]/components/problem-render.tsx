@@ -106,7 +106,6 @@ export default function ProblemRender({
 
   const {
     isLoading: isGenerateSolutionWithModelLoading,
-    error: generateSolutionWithModelError,
     generateData: callGenerateSolutionWithModel,
   } = useGenerateSolutionWithModel(problemId, user.apiKey);
 
@@ -141,7 +140,7 @@ export default function ProblemRender({
 
   // Set default model when models are loaded
   useEffect(() => {
-    if (models.length > 0 && !selectedModel) {
+    if (models && models[0] && !selectedModel) {
       setSelectedModel(models[0].name);
     }
   }, [models, selectedModel]);
@@ -443,7 +442,7 @@ export default function ProblemRender({
                 <>
                   <Button
                     variant={"outline"}
-                    onClick={() => callGenerateSolution()}
+                    onClick={() => callGenerateSolution(selectedModel)}
                   >
                     {solution ? "Re-generate" : "Generate"} Solution
                   </Button>
@@ -586,7 +585,7 @@ export default function ProblemRender({
                         await callGenerateSolutionWithModel(
                           selectedModel,
                           false,
-                          false,
+                          false
                         );
                       if (generatedSolution) {
                         setUserSolution(generatedSolution);
