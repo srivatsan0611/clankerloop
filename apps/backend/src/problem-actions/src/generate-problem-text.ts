@@ -1,10 +1,16 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getProblem, updateProblem } from "@repo/db";
+import { getTracedClient } from "@/utils/ai";
 
-export async function generateProblemText(problemId: string, model: string) {
+export async function generateProblemText(
+  problemId: string,
+  model: string,
+  userId: string
+) {
+  const tracedModel = getTracedClient(model, userId, problemId, model);
   const { object } = await generateObject({
-    model,
+    model: tracedModel,
     prompt: `Generate a coding problem for a LeetCode-style platform. ONLY return the problem text, no other text.
 	DO NOT INCLUDE TEST CASES. JUST THE PROBLEM TEXT.
 	DO NOT INCLUDE EXAMPLE INPUTS AND OUTPUTS.

@@ -2,10 +2,12 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { DEFAULT_LANGUAGE } from "./constants";
 import { getProblem, updateProblem, type TestCase } from "@repo/db";
+import { getTracedClient } from "@/utils/ai";
 
 export async function generateSolution(
   problemId: string,
   model: string,
+  userId: string,
   updateProblemInDb: boolean = true
 ) {
   const { problemText, functionSignature, testCases } =
@@ -17,8 +19,9 @@ export async function generateSolution(
     );
   }
 
+  const tracedModel = getTracedClient(model, userId, problemId, model);
   const { object } = await generateObject({
-    model,
+    model: tracedModel,
     prompt: `Generate executable ${DEFAULT_LANGUAGE} code that solves the following problem.
 
 Problem: ${problemText}

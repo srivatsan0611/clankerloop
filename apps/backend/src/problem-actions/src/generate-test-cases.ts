@@ -1,11 +1,17 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getProblem, replaceTestCases } from "@repo/db";
+import { getTracedClient } from "@/utils/ai";
 
-export async function generateTestCases(problemId: string, model: string) {
+export async function generateTestCases(
+  problemId: string,
+  model: string,
+  userId: string
+) {
   const { problemText } = await getProblem(problemId);
+  const tracedModel = getTracedClient(model, userId, problemId, model);
   const { object } = await generateObject({
-    model,
+    model: tracedModel,
     prompt: `You're given the problem text: ${JSON.stringify(problemText)}. Generate NATURAL LANGUAGE test case DESCRIPTIONS for the problem.
 	DO NOT SPECIFY THE INPUTS AND OUTPUTS. JUST THE DESCRIPTIONS -- as in, "an array of numbers", "an empty array", "a string with a length of 10", etc.
 	Generate AT MOST 15 test cases encompassing a good mix of basic, edge, and corner cases.
