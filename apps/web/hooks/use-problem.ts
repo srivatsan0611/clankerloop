@@ -580,7 +580,7 @@ export function useGenerationStatus(
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "pending" || status === "in_progress") {
-        return 30_000;
+        return 3_000;
       }
       return false;
     },
