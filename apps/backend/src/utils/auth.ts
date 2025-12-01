@@ -1,13 +1,14 @@
 /**
  * Decrypts an encrypted user ID using AES-256-GCM
  * @param encryptedUserId - Base64 encoded encrypted string (format: salt:iv:encrypted:tag)
- * @param password - The password to use for decryption (defaults to WORKOS_COOKIE_PASSWORD)
+ * @param env - Cloudflare Workers environment containing WORKOS_COOKIE_PASSWORD
  * @returns The decrypted user ID
  */
 export async function decryptUserId(
   encryptedUserId: string,
-  password: string = process.env.WORKOS_COOKIE_PASSWORD!,
+  env: Env,
 ): Promise<string> {
+  const password = env.WORKOS_COOKIE_PASSWORD;
   if (!password) {
     throw new Error("WORKOS_COOKIE_PASSWORD environment variable is not set");
   }

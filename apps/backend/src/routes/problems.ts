@@ -238,6 +238,7 @@ problems.openapi(generateProblemTextRoute, async (c) => {
     problemId,
     body.model,
     userId,
+    c.env,
     body.forceError,
     body.returnDummy,
   );
@@ -299,6 +300,7 @@ problems.openapi(generateTestCasesRoute, async (c) => {
     problemId,
     body.model,
     userId,
+    c.env,
     body.forceError,
     body.returnDummy,
   );
@@ -380,6 +382,7 @@ problems.openapi(generateInputCodeRoute, async (c) => {
     problemId,
     body.model,
     userId,
+    c.env,
     body.forceError,
     body.returnDummy,
   );
@@ -536,6 +539,7 @@ problems.openapi(generateSolutionRoute, async (c) => {
     problemId,
     body.model,
     userId,
+    c.env,
     updateProblemInDb,
     body.forceError,
     body.returnDummy,

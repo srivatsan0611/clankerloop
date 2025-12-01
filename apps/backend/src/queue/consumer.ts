@@ -11,7 +11,7 @@ import {
 import { updateJobStatus, markStepComplete, getProblem } from "@repo/db";
 import type { QueueMessage, GenerationStep } from "./types";
 import { getNextStep } from "./types";
-import { phClient } from "@/utils/analytics";
+import { getPostHogClient } from "@/utils/analytics";
 
 export async function handleQueueBatch(
   batch: MessageBatch<QueueMessage>,
@@ -63,6 +63,7 @@ export async function handleQueueBatch(
     }
   } finally {
     // Ensure PostHog events are flushed after batch processing
+    const phClient = getPostHogClient(env);
     await phClient.shutdown();
   }
 }
@@ -89,16 +90,17 @@ async function executeStep(
 
   switch (step) {
     case "generateProblemText":
-      await generateProblemText(problemId, model, userId, false, returnDummy);
+      await generateProblemText(problemId, model, userId, env, false, returnDummy);
       break;
     case "generateTestCases":
-      await generateTestCases(problemId, model, userId, false, returnDummy);
+      await generateTestCases(problemId, model, userId, env, false, returnDummy);
       break;
     case "generateTestCaseInputCode":
       await generateTestCaseInputCode(
         problemId,
         model,
         userId,
+        env,
         false,
         returnDummy,
       );
@@ -114,6 +116,7 @@ async function executeStep(
         problemId,
         model,
         userId,
+        env,
         true,
         false,
         returnDummy,

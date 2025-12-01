@@ -1,5 +1,7 @@
 import { PostHog } from "posthog-node";
 
-export const phClient = new PostHog(process.env.POSTHOG_API_KEY!, {
-  host: "https://us.i.posthog.com",
-});
+export function getPostHogClient(env: Env): PostHog {
+  return new PostHog(env.POSTHOG_API_KEY, {
+    host: "https://us.i.posthog.com",
+  });
+}

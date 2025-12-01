@@ -12,7 +12,7 @@ export const apiKeyAuth = createMiddleware(async (c, next) => {
   }
 
   try {
-    const decryptedUserId = await decryptUserId(apiKey);
+    const decryptedUserId = await decryptUserId(apiKey, c.env);
     console.log("Decrypted user ID:", decryptedUserId);
     c.set("userId", decryptedUserId);
   } catch (error) {

@@ -8,6 +8,7 @@ export async function generateTestCaseInputCode(
   problemId: string,
   model: string,
   userId: string,
+  env: Env,
   forceError?: boolean,
   returnDummy?: boolean,
 ) {
@@ -34,7 +35,7 @@ export async function generateTestCaseInputCode(
       })),
     };
   } else {
-    const tracedModel = getTracedClient(model, userId, problemId, model);
+    const tracedModel = getTracedClient(model, userId, problemId, model, env);
     const result = await generateObject({
       model: tracedModel,
       prompt: `Generate executable ${DEFAULT_LANGUAGE} code that produces the input for test cases.

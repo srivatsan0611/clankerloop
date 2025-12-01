@@ -7,6 +7,7 @@ export async function generateTestCases(
   problemId: string,
   model: string,
   userId: string,
+  env: Env,
   forceError?: boolean,
   returnDummy?: boolean,
 ) {
@@ -30,7 +31,7 @@ export async function generateTestCases(
     };
   } else {
     const { problemText } = await getProblem(problemId);
-    const tracedModel = getTracedClient(model, userId, problemId, model);
+    const tracedModel = getTracedClient(model, userId, problemId, model, env);
     const result = await generateObject({
       model: tracedModel,
       prompt: `You're given the problem text: ${JSON.stringify(problemText)}. Generate NATURAL LANGUAGE test case DESCRIPTIONS for the problem.

@@ -15,7 +15,11 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: (origin, c) => {
+      // CORS_ORIGIN may not be in Env type, so we'll access it safely
+      const corsOrigin = (c.env as Record<string, string | undefined>).CORS_ORIGIN;
+      return corsOrigin || "*";
+    },
     allowHeaders: ["Content-Type", "X-API-Key"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   }),
@@ -72,8 +76,11 @@ app.onError((err, c) => {
   console.error("Error:", err);
 
   const status = ("status" in err ? err.status : 500) as ContentfulStatusCode;
+  // Always show detailed error messages (Cloudflare Workers don't have NODE_ENV)
+  // If you want to hide errors in production, set NODE_ENV in your Cloudflare env vars
+  const nodeEnv = (c.env as Record<string, string | undefined>).NODE_ENV;
   const message =
-    process.env.NODE_ENV === "production" && status === 500
+    nodeEnv === "production" && status === 500
       ? "An unexpected error occurred"
       : err.message;
 

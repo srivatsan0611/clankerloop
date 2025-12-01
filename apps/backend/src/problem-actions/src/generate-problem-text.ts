@@ -7,6 +7,7 @@ export async function generateProblemText(
   problemId: string,
   model: string,
   userId: string,
+  env: Env,
   forceError?: boolean,
   returnDummy?: boolean,
 ) {
@@ -23,7 +24,7 @@ export async function generateProblemText(
       functionSignature: "(nums: number[]): number",
     };
   } else {
-    const tracedModel = getTracedClient(model, userId, problemId, model);
+    const tracedModel = getTracedClient(model, userId, problemId, model, env);
     const result = await generateObject({
       model: tracedModel,
       prompt: `Generate a coding problem for a LeetCode-style platform. ONLY return the problem text, no other text.

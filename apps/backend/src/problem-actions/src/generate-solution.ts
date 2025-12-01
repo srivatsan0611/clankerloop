@@ -8,6 +8,7 @@ export async function generateSolution(
   problemId: string,
   model: string,
   userId: string,
+  env: Env,
   updateProblemInDb: boolean = true,
   forceError?: boolean,
   returnDummy?: boolean,
@@ -32,7 +33,7 @@ export async function generateSolution(
         "function runSolution(nums: number[]): number { return nums.reduce((a, b) => a + b, 0); }",
     };
   } else {
-    const tracedModel = getTracedClient(model, userId, problemId, model);
+    const tracedModel = getTracedClient(model, userId, problemId, model, env);
     const result = await generateObject({
       model: tracedModel,
       prompt: `Generate executable ${DEFAULT_LANGUAGE} code that solves the following problem.
