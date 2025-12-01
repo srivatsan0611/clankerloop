@@ -133,6 +133,7 @@ export default function ProblemRender({
 
   const {
     completedSteps,
+    currentStep,
     isGenerating,
     isComplete,
     isFailed,
@@ -200,8 +201,25 @@ export default function ProblemRender({
     }
   }, [completedSteps, testCaseOutputs, getTestCaseOutputs]);
 
-  // Helper to determine if buttons should be shown for a step
-  const showButtons = !isGenerating || isComplete || isFailed;
+  // Helper to determine if buttons should be shown for a specific step
+  const shouldShowButtonsForStep = (step: string) => {
+    // Show buttons when not generating, complete, failed, OR when there's an error at any step
+    const generalCondition =
+      !isGenerating ||
+      isComplete ||
+      isFailed ||
+      problemTextError ||
+      testCasesError ||
+      testCaseInputCodeError ||
+      testCaseInputsError ||
+      solutionError ||
+      testCaseOutputsError;
+
+    // Additionally, if generation failed at this specific step, show buttons
+    const isFailedAtThisStep = isFailed && currentStep === step;
+
+    return generalCondition || isFailedAtThisStep;
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
@@ -248,14 +266,14 @@ export default function ProblemRender({
         <ResizablePanel defaultSize={20} className="min-h-0">
           <div className="h-full overflow-auto p-4 flex flex-col gap-4">
             <div>Problem: {problemId}</div>
-            {isFailed && generationError && (
+            {generationError && (
               <Alert variant="destructive">
-                <AlertTitle>Generation Failed</AlertTitle>
+                <AlertTitle>Generation Error</AlertTitle>
                 <AlertDescription>{generationError}</AlertDescription>
               </Alert>
             )}
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateProblemText") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -275,13 +293,12 @@ export default function ProblemRender({
                   isGenerating &&
                   !completedSteps.includes("generateProblemText");
                 const shouldShowLoader =
-                  isProblemTextLoading ||
-                  (isGeneratingProblemText && !hasProblemText) ||
-                  (!hasProblemText && !problemTextError);
+                  (isProblemTextLoading ||
+                    (isGeneratingProblemText && !hasProblemText) ||
+                    (!hasProblemText && !problemTextError)) &&
+                  !problemTextError;
 
-                return shouldShowLoader ? (
-                  <Loader />
-                ) : (
+                return (
                   <>
                     {problemTextError && (
                       <Alert variant="destructive" className="mb-4">
@@ -293,17 +310,21 @@ export default function ProblemRender({
                         </AlertDescription>
                       </Alert>
                     )}
-                    {hasProblemText && (
-                      <MessageResponse>
-                        {problemText.problemText}
-                      </MessageResponse>
+                    {shouldShowLoader ? (
+                      <Loader />
+                    ) : (
+                      hasProblemText && (
+                        <MessageResponse>
+                          {problemText.problemText}
+                        </MessageResponse>
+                      )
                     )}
                   </>
                 );
               })()}
             </div>
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateTestCases") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -317,24 +338,25 @@ export default function ProblemRender({
                   </Button>
                 </>
               )}
-              {isTestCasesLoading ||
-              (isGenerating &&
-                !completedSteps.includes("generateTestCases") &&
-                !testCases) ? (
-                <Loader />
-              ) : (
-                <>
-                  {testCasesError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>
-                        {testCasesError instanceof Error
-                          ? testCasesError.message
-                          : String(testCasesError)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {testCases && (
+              <>
+                {testCasesError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {testCasesError instanceof Error
+                        ? testCasesError.message
+                        : String(testCasesError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isTestCasesLoading ||
+                (isGenerating &&
+                  !completedSteps.includes("generateTestCases") &&
+                  !testCases &&
+                  !testCasesError) ? (
+                  <Loader />
+                ) : (
+                  testCases && (
                     <div>
                       {testCases.map((testCase, i) => (
                         <div key={`testcase-description-${i}`}>
@@ -343,12 +365,12 @@ export default function ProblemRender({
                         </div>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
+                  )
+                )}
+              </>
             </div>
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateTestCaseInputCode") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -365,35 +387,36 @@ export default function ProblemRender({
                   </Button>
                 </>
               )}
-              {isTestCaseInputsLoading ||
-              (isGenerating &&
-                !completedSteps.includes("generateTestCaseInputCode") &&
-                !testCaseInputCode) ? (
-                <Loader />
-              ) : (
-                <>
-                  {testCaseInputCodeError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>
-                        {testCaseInputCodeError instanceof Error
-                          ? testCaseInputCodeError.message
-                          : String(testCaseInputCodeError)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {testCaseInputCode && (
+              <>
+                {testCaseInputCodeError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {testCaseInputCodeError instanceof Error
+                        ? testCaseInputCodeError.message
+                        : String(testCaseInputCodeError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isTestCaseInputsLoading ||
+                (isGenerating &&
+                  !completedSteps.includes("generateTestCaseInputCode") &&
+                  !testCaseInputCode &&
+                  !testCaseInputCodeError) ? (
+                  <Loader />
+                ) : (
+                  testCaseInputCode && (
                     <div>
                       {testCaseInputCode.map((testCaseInput, i) => (
                         <div key={`testcase-input-${i}`}>{testCaseInput}</div>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
+                  )
+                )}
+              </>
             </div>
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateTestCaseInputs") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -409,24 +432,25 @@ export default function ProblemRender({
                   </Button>
                 </>
               )}
-              {isGenerateTestCaseInputsLoading ||
-              (isGenerating &&
-                !completedSteps.includes("generateTestCaseInputs") &&
-                !testCaseInputs) ? (
-                <Loader />
-              ) : (
-                <>
-                  {testCaseInputsError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>
-                        {testCaseInputsError instanceof Error
-                          ? testCaseInputsError.message
-                          : String(testCaseInputsError)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {testCaseInputs && (
+              <>
+                {testCaseInputsError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {testCaseInputsError instanceof Error
+                        ? testCaseInputsError.message
+                        : String(testCaseInputsError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isGenerateTestCaseInputsLoading ||
+                (isGenerating &&
+                  !completedSteps.includes("generateTestCaseInputs") &&
+                  !testCaseInputs &&
+                  !testCaseInputsError) ? (
+                  <Loader />
+                ) : (
+                  testCaseInputs && (
                     <div>
                       {testCaseInputs.map((result, i) => (
                         <div key={`run-generate-input-result-${i}`}>
@@ -434,12 +458,12 @@ export default function ProblemRender({
                         </div>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
+                  )
+                )}
+              </>
             </div>
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateSolution") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -452,29 +476,30 @@ export default function ProblemRender({
                   </Button>
                 </>
               )}
-              {isGenerateSolutionLoading ||
-              (isGenerating &&
-                !completedSteps.includes("generateSolution") &&
-                !solution) ? (
-                <Loader />
-              ) : (
-                <>
-                  {solutionError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>
-                        {solutionError instanceof Error
-                          ? solutionError.message
-                          : String(solutionError)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {solution && <MessageResponse>{solution}</MessageResponse>}
-                </>
-              )}
+              <>
+                {solutionError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {solutionError instanceof Error
+                        ? solutionError.message
+                        : String(solutionError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isGenerateSolutionLoading ||
+                (isGenerating &&
+                  !completedSteps.includes("generateSolution") &&
+                  !solution &&
+                  !solutionError) ? (
+                  <Loader />
+                ) : (
+                  solution && <MessageResponse>{solution}</MessageResponse>
+                )}
+              </>
             </div>
             <div>
-              {showButtons && (
+              {shouldShowButtonsForStep("generateTestCaseOutputs") && (
                 <>
                   <Button
                     variant={"outline"}
@@ -491,24 +516,25 @@ export default function ProblemRender({
                   </Button>
                 </>
               )}
-              {isGenerateTestCaseOutputsLoading ||
-              (isGenerating &&
-                !completedSteps.includes("generateTestCaseOutputs") &&
-                !testCaseOutputs) ? (
-                <Loader />
-              ) : (
-                <>
-                  {testCaseOutputsError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>
-                        {testCaseOutputsError instanceof Error
-                          ? testCaseOutputsError.message
-                          : String(testCaseOutputsError)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {testCaseOutputs && (
+              <>
+                {testCaseOutputsError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {testCaseOutputsError instanceof Error
+                        ? testCaseOutputsError.message
+                        : String(testCaseOutputsError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isGenerateTestCaseOutputsLoading ||
+                (isGenerating &&
+                  !completedSteps.includes("generateTestCaseOutputs") &&
+                  !testCaseOutputs &&
+                  !testCaseOutputsError) ? (
+                  <Loader />
+                ) : (
+                  testCaseOutputs && (
                     <div>
                       {testCaseOutputs.map((output, i) => (
                         <div key={`testcase-output-${i}`}>
@@ -516,9 +542,9 @@ export default function ProblemRender({
                         </div>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
+                  )
+                )}
+              </>
             </div>
             <div>
               <Button
