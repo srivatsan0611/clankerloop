@@ -87,13 +87,17 @@ export async function getModelForProblem(
 export async function createProblem(
   data?: Partial<NewProblem>
 ): Promise<string> {
+  if (!data?.generatedByUserId) {
+    throw new Error("generatedByUserId is required");
+  }
+
   const [result] = await db
     .insert(problems)
     .values({
       problemText: data?.problemText ?? "",
       functionSignature: data?.functionSignature ?? "",
       solution: data?.solution ?? "",
-      generatedByUserId: data?.generatedByUserId ?? null,
+      generatedByUserId: data?.generatedByUserId,
     })
     .returning({ id: problems.id });
 
