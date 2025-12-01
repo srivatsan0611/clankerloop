@@ -2,10 +2,12 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { DEFAULT_LANGUAGE } from "./constants";
 import { getProblem, updateTestCase, type TestCase } from "@repo/db";
+import { getTracedClient } from "@/utils/ai";
 
 export async function generateTestCaseInputCode(
   problemId: string,
-  model: string
+  model: string,
+  userId: string
 ) {
   const { problemText, functionSignature, testCases } =
     await getProblem(problemId);
@@ -16,8 +18,9 @@ export async function generateTestCaseInputCode(
     );
   }
 
+  const tracedModel = getTracedClient(model, userId, problemId, model);
   const { object } = await generateObject({
-    model,
+    model: tracedModel,
     prompt: `Generate executable ${DEFAULT_LANGUAGE} code that produces the input for test cases.
 
 Problem: ${problemText}

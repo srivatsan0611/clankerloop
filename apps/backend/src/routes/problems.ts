@@ -228,7 +228,8 @@ problems.openapi(generateProblemTextRoute, async (c) => {
     await updateProblem(problemId, { generatedByModelId: modelId });
   }
 
-  const result = await generateProblemText(problemId, body.model);
+  const userId = problem.generatedByUserId || "unknown";
+  const result = await generateProblemText(problemId, body.model, userId);
 
   const enqueueNext = body.enqueueNextStep !== false;
   const jobId = await enqueueNextStepIfEnabled(
@@ -261,7 +262,8 @@ problems.openapi(generateTestCasesRoute, async (c) => {
     await updateProblem(problemId, { generatedByModelId: modelId });
   }
 
-  const result = await generateTestCases(problemId, body.model);
+  const userId = problem.generatedByUserId || "unknown";
+  const result = await generateTestCases(problemId, body.model, userId);
 
   const enqueueNext = body.enqueueNextStep !== false;
   const jobId = await enqueueNextStepIfEnabled(
@@ -297,7 +299,8 @@ problems.openapi(generateInputCodeRoute, async (c) => {
     await updateProblem(problemId, { generatedByModelId: modelId });
   }
 
-  const result = await generateTestCaseInputCode(problemId, body.model);
+  const userId = problem.generatedByUserId || "unknown";
+  const result = await generateTestCaseInputCode(problemId, body.model, userId);
 
   const enqueueNext = body.enqueueNextStep !== false;
   const jobId = await enqueueNextStepIfEnabled(
@@ -364,10 +367,12 @@ problems.openapi(generateSolutionRoute, async (c) => {
     await updateProblem(problemId, { generatedByModelId: modelId });
   }
 
+  const userId = problem.generatedByUserId || "unknown";
   const updateProblemInDb = body.updateProblem !== false;
   const result = await generateSolution(
     problemId,
     body.model,
+    userId,
     updateProblemInDb
   );
 
