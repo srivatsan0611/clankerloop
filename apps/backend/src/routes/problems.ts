@@ -27,6 +27,8 @@ import {
   updateProblem,
   getProblem,
   getModelForProblem,
+  updateJobStatus,
+  markStepComplete,
 } from "@repo/db";
 import { getNextStep, STEP_ORDER, type GenerationStep } from "../queue/types";
 import {
@@ -111,7 +113,7 @@ async function enqueueNextStepIfEnabled(
 
   // Get or create job
   let job = await getLatestJobForProblem(problemId);
-  if (!job || job.status === "completed" || job.status === "failed") {
+  if (!job || job.status === "completed") {
     const modelId = model ? await getOrCreateModel(model) : undefined;
     const jobId = await createGenerationJob(problemId, modelId);
     job = {
@@ -124,6 +126,17 @@ async function enqueueNextStepIfEnabled(
       error: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+    };
+  } else if (job.status === "failed") {
+    // Reset failed job to pending since current step succeeded
+    await updateJobStatus(job.id, "pending", undefined, undefined);
+    // Mark the current step as complete since it succeeded
+    await markStepComplete(job.id, currentStep);
+    job = {
+      ...job,
+      status: "pending",
+      error: null,
+      completedSteps: [...(job.completedSteps || []), currentStep],
     };
   }
 
