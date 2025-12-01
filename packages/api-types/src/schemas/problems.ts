@@ -6,6 +6,7 @@ export const ProblemSchema = z
     id: z.string().uuid(),
     problemText: z.string(),
     functionSignature: z.string(),
+    problemTextReworded: z.string().nullable(),
     solution: z.string().nullable(),
     generatedByModelId: z.string().uuid().nullable(),
     generatedByUserId: z.string().nullable(),
@@ -74,6 +75,7 @@ export const ProblemTextSchema = z
   .object({
     problemText: z.string(),
     functionSignature: z.string(),
+    problemTextReworded: z.string(),
   })
   .openapi("ProblemText");
 

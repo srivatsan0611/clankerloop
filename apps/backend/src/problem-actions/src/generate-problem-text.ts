@@ -15,13 +15,14 @@ export async function generateProblemText(
     throw new Error("Force error: generateObject call skipped");
   }
 
-  let object: { problemText: string; functionSignature: string };
+  let object: { problemText: string; functionSignature: string; problemTextReworded: string };
 
   if (returnDummy) {
     object = {
       problemText:
         "This is a dummy problem text. Given an array of integers, find the maximum sum of a contiguous subarray.",
       functionSignature: "(nums: number[]): number",
+      problemTextReworded: "This is a dummy reworded problem text describing a real-world scenario.",
     };
   } else {
     const tracedModel = getTracedClient(model, userId, problemId, model, env);
@@ -37,12 +38,13 @@ export async function generateProblemText(
 	(nums: number[], k: number, customType: {something: string; anotherThing: number}): number
 	`,
       schema: z.object({
-        problemText: z.string(),
+        problemText: z.string().describe("The problem to be solved, i.e. 'Given an array of integers, find the maximum sum of a contiguous subarray.'"),
         functionSignature: z
           .string()
           .describe(
             "The empty function WITH NO OTHER TEXT, DO NOT INCLUDE FUNCTION NAME in TypeScript types DEFINED INLINE FOR CUSTOM TYPES -- for example, (nums: number[], k: number, customType: {something: string; anotherThing: number}): number",
           ),
+		problemTextReworded: z.string().describe("The problem text, but reworded to be a real-world problem instead of a coding problem. Avoid technical jargon and focus on a real-world problem."),
       }),
     });
     object = result.object;
@@ -51,11 +53,13 @@ export async function generateProblemText(
   await updateProblem(problemId, {
     problemText: object.problemText,
     functionSignature: object.functionSignature,
+    problemTextReworded: object.problemTextReworded,
   });
 
   return {
     problemText: object.problemText,
     functionSignature: object.functionSignature,
+    problemTextReworded: object.problemTextReworded,
   };
 }
 
@@ -64,5 +68,6 @@ export async function getProblemText(problemId: string) {
   return {
     problemText: problem.problemText,
     functionSignature: problem.functionSignature,
+    problemTextReworded: problem.problemTextReworded,
   };
 }

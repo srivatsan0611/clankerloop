@@ -21,6 +21,7 @@ export async function generateProblemText(
   return {
     problemText: data.problemText,
     functionSignature: data.functionSignature,
+    problemTextReworded: data.problemTextReworded,
   };
 }
 

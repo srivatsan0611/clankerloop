@@ -43,6 +43,20 @@
       "when": 1764570982509,
       "tag": "0005_wide_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1764619501439,
+      "tag": "0006_majestic_terror",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1764619566960,
+      "tag": "0007_acoustic_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

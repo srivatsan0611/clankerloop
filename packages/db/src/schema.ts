@@ -18,6 +18,7 @@ export const problems = pgTable("problems", {
   id: uuid("id").primaryKey().defaultRandom(),
   problemText: text("problem_text").notNull(),
   functionSignature: text("function_signature").notNull(),
+  problemTextReworded: text("problem_text_reworded").notNull(),
   solution: text("solution"),
   generatedByModelId: uuid("generated_by_model_id").references(() => models.id),
   generatedByUserId: text("generated_by_user_id").notNull(),

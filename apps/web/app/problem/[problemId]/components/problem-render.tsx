@@ -281,7 +281,7 @@ export default function ProblemRender({
                 checked={autoEnqueue}
                 onCheckedChange={(checked) =>
                   setAutoEnqueue(
-                    checked === true || checked === "indeterminate",
+                    checked === true || checked === "indeterminate"
                   )
                 }
               />
@@ -298,7 +298,7 @@ export default function ProblemRender({
                 checked={returnDummy}
                 onCheckedChange={(checked) =>
                   setReturnDummy(
-                    checked === true || checked === "indeterminate",
+                    checked === true || checked === "indeterminate"
                   )
                 }
               />
@@ -325,7 +325,7 @@ export default function ProblemRender({
                         selectedModel,
                         false,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -339,7 +339,7 @@ export default function ProblemRender({
                         selectedModel,
                         true,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -380,9 +380,14 @@ export default function ProblemRender({
                       <Loader />
                     ) : (
                       hasProblemText && (
-                        <MessageResponse>
-                          {problemText.problemText}
-                        </MessageResponse>
+                        <>
+                          <MessageResponse>
+                            {problemText.problemText}
+                          </MessageResponse>
+                          <MessageResponse>
+                            {problemText.problemTextReworded}
+                          </MessageResponse>
+                        </>
                       )
                     )}
                   </>
@@ -399,7 +404,7 @@ export default function ProblemRender({
                         selectedModel,
                         false,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -414,7 +419,7 @@ export default function ProblemRender({
                         selectedModel,
                         true,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -468,7 +473,7 @@ export default function ProblemRender({
                         selectedModel,
                         false,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -483,7 +488,7 @@ export default function ProblemRender({
                         selectedModel,
                         true,
                         autoEnqueue,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                     disabled={!selectedModel}
@@ -585,7 +590,7 @@ export default function ProblemRender({
                         undefined,
                         autoEnqueue,
                         false,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                   >
@@ -599,7 +604,7 @@ export default function ProblemRender({
                         undefined,
                         autoEnqueue,
                         true,
-                        returnDummy,
+                        returnDummy
                       )
                     }
                   >
@@ -748,7 +753,7 @@ export default function ProblemRender({
                           selectedModel,
                           false,
                           autoEnqueue,
-                          false,
+                          false
                         );
                       if (generatedSolution) {
                         setUserSolution(generatedSolution);
@@ -778,7 +783,7 @@ export default function ProblemRender({
                           selectedModel,
                           false,
                           autoEnqueue,
-                          true,
+                          true
                         );
                       if (generatedSolution) {
                         setUserSolution(generatedSolution);

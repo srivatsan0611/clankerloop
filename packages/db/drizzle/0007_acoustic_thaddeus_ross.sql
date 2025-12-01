@@ -1,0 +1,1 @@
+ALTER TABLE "problems" ALTER COLUMN "problem_text_reworded" SET NOT NULL;

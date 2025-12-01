@@ -96,6 +96,7 @@ export async function createProblem(
     .values({
       problemText: data?.problemText ?? "",
       functionSignature: data?.functionSignature ?? "",
+      problemTextReworded: data?.problemTextReworded ?? "",
       solution: data?.solution ?? "",
       generatedByUserId: data?.generatedByUserId,
     })
