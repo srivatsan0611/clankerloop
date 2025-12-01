@@ -69,7 +69,7 @@ export default function CreateProblemForm({
         try {
           const newModel = await createModel(
             newModelName.trim(),
-            encryptedUserId
+            encryptedUserId,
           );
           modelToUse = newModel.name;
           // Refresh models list
@@ -88,7 +88,7 @@ export default function CreateProblemForm({
       const { problemId } = await createProblem(
         modelToUse,
         encryptedUserId,
-        autoGenerate
+        autoGenerate,
       );
       router.push(`/problem/${problemId}`);
     } catch (error) {

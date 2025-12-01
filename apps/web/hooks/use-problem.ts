@@ -29,7 +29,7 @@ import { getProblemModel } from "@/actions/get-problem-model";
 
 export function useProblemText(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["problemText", problemId];
@@ -60,7 +60,7 @@ export function useProblemText(
         model,
         encryptedUserId,
         enqueueNextStep ?? true,
-        forceError
+        forceError,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -80,7 +80,7 @@ export function useProblemText(
   const generateData = async (
     model: string,
     forceError?: boolean,
-    enqueueNextStep?: boolean
+    enqueueNextStep?: boolean,
   ) => {
     if (!problemId) throw new Error("Problem ID is not set");
     return generateMutation.mutateAsync({
@@ -102,7 +102,7 @@ export function useProblemText(
 
 export function useTestCases(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["testCases", problemId];
@@ -133,7 +133,7 @@ export function useTestCases(
         model,
         encryptedUserId,
         enqueueNextStep ?? true,
-        forceError
+        forceError,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -153,7 +153,7 @@ export function useTestCases(
   const generateData = async (
     model: string,
     forceError?: boolean,
-    enqueueNextStep?: boolean
+    enqueueNextStep?: boolean,
   ) => {
     if (!problemId) throw new Error("Problem ID is not set");
     return generateMutation.mutateAsync({
@@ -175,7 +175,7 @@ export function useTestCases(
 
 export function useTestCaseInputCode(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["testCaseInputCode", problemId];
@@ -206,7 +206,7 @@ export function useTestCaseInputCode(
         model,
         encryptedUserId,
         enqueueNextStep ?? true,
-        forceError
+        forceError,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -226,7 +226,7 @@ export function useTestCaseInputCode(
   const generateData = async (
     model: string,
     forceError?: boolean,
-    enqueueNextStep?: boolean
+    enqueueNextStep?: boolean,
   ) => {
     if (!problemId) throw new Error("Problem ID is not set");
     return generateMutation.mutateAsync({
@@ -248,7 +248,7 @@ export function useTestCaseInputCode(
 
 export function useTestCaseInputs(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["testCaseInputs", problemId];
@@ -273,7 +273,7 @@ export function useTestCaseInputs(
       const result = await generateTestCaseInputs(
         id,
         encryptedUserId,
-        enqueueNextStep ?? true
+        enqueueNextStep ?? true,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -309,7 +309,7 @@ export function useTestCaseInputs(
 
 export function useSolution(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["solution", problemId];
@@ -343,7 +343,7 @@ export function useSolution(
         encryptedUserId,
         updateProblem,
         enqueueNextStep,
-        forceError
+        forceError,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -364,7 +364,7 @@ export function useSolution(
     model: string,
     updateProblem?: boolean,
     enqueueNextStep?: boolean,
-    forceError?: boolean
+    forceError?: boolean,
   ) => {
     if (!problemId) throw new Error("Problem ID is not set");
     return generateMutation.mutateAsync({
@@ -387,7 +387,7 @@ export function useSolution(
 
 export function useGenerateSolutionWithModel(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const generateMutation = useMutation({
     mutationFn: async ({
@@ -409,7 +409,7 @@ export function useGenerateSolutionWithModel(
         encryptedUserId,
         updateProblem,
         enqueueNextStep,
-        forceError
+        forceError,
       );
     },
   });
@@ -418,7 +418,7 @@ export function useGenerateSolutionWithModel(
     model: string,
     updateProblem?: boolean,
     enqueueNextStep?: boolean,
-    forceError?: boolean
+    forceError?: boolean,
   ) => {
     if (!problemId) throw new Error("Problem ID is not set");
     return generateMutation.mutateAsync({
@@ -440,7 +440,7 @@ export function useGenerateSolutionWithModel(
 
 export function useTestCaseOutputs(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["testCaseOutputs", problemId];
@@ -465,7 +465,7 @@ export function useTestCaseOutputs(
       const result = await generateTestCaseOutputs(
         id,
         encryptedUserId,
-        enqueueNextStep ?? true
+        enqueueNextStep ?? true,
       );
       queryClient.setQueryData(queryKey, result);
       return result;
@@ -502,7 +502,7 @@ export function useTestCaseOutputs(
 export function useRunUserSolution(
   problemId: string | null,
   userSolution: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const queryClient = useQueryClient();
   const queryKey = ["runUserSolution", problemId, userSolution];
@@ -542,7 +542,7 @@ export function useRunUserSolution(
 
 export function useGenerationStatus(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const query = useQuery({
     queryKey: ["generationStatus", problemId],
@@ -590,7 +590,7 @@ export function useModels(encryptedUserId?: string) {
 
 export function useProblemModel(
   problemId: string | null,
-  encryptedUserId?: string
+  encryptedUserId?: string,
 ) {
   const query = useQuery({
     queryKey: ["problemModel", problemId],
