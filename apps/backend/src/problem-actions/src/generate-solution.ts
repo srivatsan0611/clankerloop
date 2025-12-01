@@ -38,6 +38,7 @@ ${testCases.map((tc: TestCase, i: number) => `${i + 1}. ${tc.description}${tc.is
 
 Generate code that passes all the test cases.
 THE FUNCTION NAME MUST BE runSolution.
+DO NOT INCLUDE ANYTHING BUT THE FUNCTION DEFINITION.
 `,
     schema: z.object({
       solution: z

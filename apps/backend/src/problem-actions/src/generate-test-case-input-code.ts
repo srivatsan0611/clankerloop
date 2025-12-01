@@ -56,6 +56,8 @@ Return a function like the following, where ...inputValues is the array of input
 function generateTestInput() {
 	return [...inputValues];
 }
+
+DO NOT INCLUDE ANYTHING BUT THE FUNCTION DEFINITION.
 `,
     schema: z.object({
       testCaseInputs: z
