@@ -221,7 +221,9 @@ export const parseFunctionSignatureRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: ApiSuccessSchema(FunctionSignatureSchemaGenerateResponseSchema),
+          schema: ApiSuccessSchema(
+            FunctionSignatureSchemaGenerateResponseSchema,
+          ),
         },
       },
       description: "Function signature parsed successfully",

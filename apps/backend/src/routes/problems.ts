@@ -396,7 +396,10 @@ problems.openapi(parseFunctionSignatureRoute, async (c) => {
   );
 
   return c.json(
-    { success: true as const, data: { functionSignatureSchema: result, jobId } },
+    {
+      success: true as const,
+      data: { functionSignatureSchema: result, jobId },
+    },
     200,
   );
 });

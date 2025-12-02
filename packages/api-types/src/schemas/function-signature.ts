@@ -44,7 +44,7 @@ export const TypeDefSchema: z.ZodType<TypeDef> = z.lazy(() =>
       kind: z.literal("reference"),
       name: z.string(),
     }),
-  ])
+  ]),
 );
 
 // Named type definition (for recursive/reusable types)
