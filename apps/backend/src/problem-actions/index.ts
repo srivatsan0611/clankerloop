@@ -1,6 +1,7 @@
 // Types
 export type {
   TestResult,
+  CustomTestResult,
   SandboxConfig,
   TestCase,
   SupportedLanguage,
@@ -67,4 +68,7 @@ export {
 } from "./src/generate-test-case-outputs";
 
 // Run user solution
-export { runUserSolution } from "./src/run-user-solution";
+export {
+  runUserSolution,
+  runUserSolutionWithCustomInputs,
+} from "./src/run-user-solution";

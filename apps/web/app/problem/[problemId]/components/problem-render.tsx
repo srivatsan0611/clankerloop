@@ -20,12 +20,14 @@ import {
   useGenerateSolutionWithModel,
   useTestCaseOutputs,
   useRunUserSolution,
+  useRunUserSolutionWithCustomInputs,
   useGenerationStatus,
   useModels,
   useProblemModel,
   useStarterCode,
   type CodeGenLanguage,
 } from "@/hooks/use-problem";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { ClientFacingUserObject } from "@/lib/auth-types";
@@ -81,6 +83,10 @@ export default function ProblemRender({
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [testCaseInputsOpen, setTestCaseInputsOpen] = useState<boolean>(true);
   const [testCaseOutputsOpen, setTestCaseOutputsOpen] = useState<boolean>(true);
+  const [customInputsText, setCustomInputsText] = useState<string>("");
+  const [customInputsError, setCustomInputsError] = useState<string | null>(
+    null
+  );
 
   const {
     isLoading: isProblemTextLoading,
@@ -178,6 +184,13 @@ export default function ProblemRender({
     data: userSolutionTestResults,
     runData: callRunUserSolution,
   } = useRunUserSolution(problemId, userSolution, user.apiKey);
+
+  const {
+    isLoading: isRunCustomTestsLoading,
+    error: customTestsError,
+    data: customTestResults,
+    runData: callRunCustomTests,
+  } = useRunUserSolutionWithCustomInputs(problemId, userSolution, user.apiKey);
 
   const {
     completedSteps,
@@ -964,6 +977,158 @@ export default function ProblemRender({
                           },
                           null,
                           2,
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible
+              open={openSections["runCustomTests"] ?? false}
+              onOpenChange={(open) => {
+                setOpenSections((prev) => ({
+                  ...prev,
+                  runCustomTests: open,
+                }));
+              }}
+              className="border-b pb-4"
+            >
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between gap-2 w-full py-2 hover:bg-muted/50 rounded-md px-2 -mx-2 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <ChevronDownIcon
+                      className={`h-4 w-4 transition-transform ${
+                        openSections["runCustomTests"]
+                          ? "rotate-0"
+                          : "-rotate-90"
+                      }`}
+                    />
+                    <h3 className="text-sm font-medium">
+                      Run with Custom Inputs
+                    </h3>
+                  </div>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Enter custom test inputs as a JSON array. Each element is an
+                  array of function arguments.
+                </p>
+                {testCaseInputs && testCaseInputs.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Example format based on existing test case:{" "}
+                    <code className="bg-muted px-1 rounded">
+                      {JSON.stringify([testCaseInputs[0]])}
+                    </code>
+                  </p>
+                )}
+                <Textarea
+                  placeholder="[[1, 2, 3], [4, 5, 6]]"
+                  value={customInputsText}
+                  onChange={(e) => {
+                    setCustomInputsText(e.target.value);
+                    setCustomInputsError(null);
+                  }}
+                  className="font-mono text-sm min-h-[80px]"
+                />
+                {customInputsError && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Invalid JSON</AlertTitle>
+                    <AlertDescription>{customInputsError}</AlertDescription>
+                  </Alert>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      // Parse and validate JSON
+                      let parsed: unknown;
+                      try {
+                        parsed = JSON.parse(customInputsText);
+                      } catch {
+                        setCustomInputsError(
+                          "Invalid JSON. Please enter a valid JSON array."
+                        );
+                        return;
+                      }
+
+                      if (!Array.isArray(parsed)) {
+                        setCustomInputsError(
+                          "Input must be a JSON array of test cases."
+                        );
+                        return;
+                      }
+
+                      if (parsed.length === 0) {
+                        setCustomInputsError(
+                          "Please provide at least one test case."
+                        );
+                        return;
+                      }
+
+                      if (parsed.length > 10) {
+                        setCustomInputsError("Maximum 10 test cases allowed.");
+                        return;
+                      }
+
+                      // Validate each input is an array
+                      for (let i = 0; i < parsed.length; i++) {
+                        if (!Array.isArray(parsed[i])) {
+                          setCustomInputsError(
+                            `Test case ${i + 1} must be an array of function arguments.`
+                          );
+                          return;
+                        }
+                      }
+
+                      setCustomInputsError(null);
+                      await callRunCustomTests(parsed as unknown[][]);
+                    } catch (error) {
+                      console.error("Failed to run custom tests:", error);
+                    }
+                  }}
+                  disabled={isRunCustomTestsLoading || !customInputsText.trim()}
+                >
+                  {isRunCustomTestsLoading ? "Running..." : "Run Custom Tests"}
+                </Button>
+                {isRunCustomTestsLoading && (
+                  <div className="flex items-center gap-2">
+                    <Loader />
+                    <span className="text-sm text-muted-foreground">
+                      Running custom tests...
+                    </span>
+                  </div>
+                )}
+                {customTestsError && !isRunCustomTestsLoading && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {customTestsError instanceof Error
+                        ? customTestsError.message
+                        : String(customTestsError)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {customTestResults && (
+                  <div className="space-y-1">
+                    {customTestResults.map((result, i) => (
+                      <div
+                        key={`custom-test-result-${i}`}
+                        className="text-sm font-mono bg-muted p-2 rounded"
+                      >
+                        {JSON.stringify(
+                          {
+                            input: result.input,
+                            expected: result.expected,
+                            actual: result.actual,
+                            error: result.error,
+                            stdout: result.stdout,
+                          },
+                          null,
+                          2
                         )}
                       </div>
                     ))}

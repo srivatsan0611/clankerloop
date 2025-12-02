@@ -10,6 +10,14 @@ export type TestResult = {
   stdout?: string;
 };
 
+export type CustomTestResult = {
+  input: unknown;
+  expected: unknown | null;
+  actual: unknown | null;
+  error?: string;
+  stdout?: string;
+};
+
 export interface SandboxConfig {
   apiKey: string;
 }

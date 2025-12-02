@@ -1,8 +1,8 @@
 import { apiPost } from "@/lib/api-client";
-import type { TestResult } from "@repo/api-types";
+import type { TestResult, CustomTestResult } from "@repo/api-types";
 
 // Re-export types for consumers
-export type { TestCase, TestResult } from "@repo/api-types";
+export type { TestCase, TestResult, CustomTestResult } from "@repo/api-types";
 
 export async function runUserSolution(
   problemId: string,
@@ -12,6 +12,19 @@ export async function runUserSolution(
   return apiPost<TestResult[]>(
     `/${problemId}/solution/run`,
     { code: userCode },
+    encryptedUserId,
+  );
+}
+
+export async function runUserSolutionWithCustomInputs(
+  problemId: string,
+  userCode: string,
+  customInputs: unknown[][],
+  encryptedUserId?: string,
+): Promise<CustomTestResult[]> {
+  return apiPost<CustomTestResult[]>(
+    `/${problemId}/solution/run-custom`,
+    { code: userCode, customInputs },
     encryptedUserId,
   );
 }
