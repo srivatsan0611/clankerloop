@@ -75,7 +75,7 @@ interface AdminCollapsiblesProps {
     model: string,
     forceError: boolean,
     returnDummy: boolean,
-    skipCache: boolean,
+    skipCache: boolean
   ) => void;
   // Test cases hooks
   isTestCasesLoading: boolean;
@@ -93,7 +93,7 @@ interface AdminCollapsiblesProps {
     model: string,
     forceError: boolean,
     returnDummy: boolean,
-    skipCache: boolean,
+    skipCache: boolean
   ) => void;
   // Test case input code hooks
   isTestCaseInputsLoading: boolean;
@@ -104,7 +104,7 @@ interface AdminCollapsiblesProps {
     model: string,
     forceError: boolean,
     returnDummy: boolean,
-    skipCache: boolean,
+    skipCache: boolean
   ) => void;
   // Test case inputs hooks
   testCaseInputs: unknown[] | null | undefined;
@@ -119,7 +119,7 @@ interface AdminCollapsiblesProps {
     updateProblem?: boolean,
     enqueueNextStep?: boolean,
     forceError?: boolean,
-    returnDummy?: boolean,
+    returnDummy?: boolean
   ) => Promise<string | null>;
   // Test case outputs hooks
   testCaseOutputs: unknown[] | null | undefined;
@@ -180,7 +180,7 @@ interface AdminCollapsiblesProps {
     model: string,
     forceError: boolean,
     returnDummy: boolean,
-    skipCache: boolean,
+    skipCache: boolean
   ) => Promise<string | null>;
 }
 
@@ -254,7 +254,7 @@ export default function AdminCollapsibles({
   const [allFocusAreas, setAllFocusAreas] = useState<FocusArea[]>([]);
   const [problemFocusAreas, setProblemFocusAreas] = useState<FocusArea[]>([]);
   const [selectedFocusAreaIds, setSelectedFocusAreaIds] = useState<string[]>(
-    [],
+    []
   );
   const [isLoadingFocusAreas, setIsLoadingFocusAreas] = useState(true);
   const [isRegeneratingWithFocusAreas, setIsRegeneratingWithFocusAreas] =
@@ -294,7 +294,7 @@ export default function AdminCollapsibles({
         originalIds.some((id, idx) => id !== sortedNewIds[idx]);
       setFocusAreasChanged(hasChanged);
     },
-    [problemFocusAreas],
+    [problemFocusAreas]
   );
 
   // Update lastValidStepIndex based on completed steps
@@ -341,7 +341,7 @@ export default function AdminCollapsibles({
           sampleTestCases.map(({ input }, index) => ({
             id: `test-case-${Date.now()}-${index}`,
             inputText: JSON.stringify(input),
-          })),
+          }))
         );
         hasInitializedCustomTestCases.current = true;
       }
@@ -353,7 +353,7 @@ export default function AdminCollapsibles({
     step: GenerationStep,
     isLoading: boolean,
     error: unknown,
-    hasData: boolean,
+    hasData: boolean
   ): StepStatus => {
     if (error) return "error";
     if (isLoading) return "loading";
@@ -368,7 +368,7 @@ export default function AdminCollapsibles({
     stepIndex: number,
     isLoading: boolean,
     error: unknown,
-    hasData: boolean,
+    hasData: boolean
   ): boolean => {
     const stepStatus = getStepStatus(step, isLoading, error, hasData);
 
@@ -470,7 +470,7 @@ export default function AdminCollapsibles({
         user.apiKey,
         true,
         undefined,
-        { problemId, direction },
+        { problemId, direction }
       );
       router.push(`/problem/${result.problemId}`);
     } catch (error) {
@@ -489,7 +489,7 @@ export default function AdminCollapsibles({
         user.apiKey,
         true,
         undefined,
-        { problemId, direction: "similar" },
+        { problemId, direction: "similar" }
       );
       router.push(`/problem/${result.problemId}`);
     } catch (error) {
@@ -509,7 +509,7 @@ export default function AdminCollapsibles({
         true,
         undefined,
         undefined,
-        selectedFocusAreaIds.length > 0 ? selectedFocusAreaIds : undefined,
+        selectedFocusAreaIds.length > 0 ? selectedFocusAreaIds : undefined
       );
       router.push(`/problem/${result.problemId}`);
     } catch (error) {
@@ -640,7 +640,7 @@ export default function AdminCollapsibles({
       stepIndex,
       isLoading,
       error,
-      hasData,
+      hasData
     );
 
     if (!isVisible) return null;
@@ -841,7 +841,7 @@ export default function AdminCollapsibles({
                 >
                   {isRegeneratingWithFocusAreas
                     ? "Creating..."
-                    : "Generate New Problem with Selected Focus Areas"}
+                    : "Generate New Problem"}
                 </Button>
               </div>
             </>
@@ -1330,7 +1330,7 @@ export default function AdminCollapsibles({
                             className="h-6 w-6 p-0"
                             onClick={() => {
                               setCustomTestCases((prev) =>
-                                prev.filter((tc) => tc.id !== testCase.id),
+                                prev.filter((tc) => tc.id !== testCase.id)
                               );
                             }}
                           >
@@ -1346,8 +1346,8 @@ export default function AdminCollapsibles({
                             prev.map((tc) =>
                               tc.id === testCase.id
                                 ? { ...tc, inputText: e.target.value }
-                                : tc,
-                            ),
+                                : tc
+                            )
                           );
                         }}
                         className="font-mono text-sm min-h-[60px] w-full max-w-full overflow-x-hidden break-words"
@@ -1603,7 +1603,7 @@ export default function AdminCollapsibles({
                     selectedModel,
                     false,
                     true,
-                    false,
+                    false
                   );
                   if (generatedSolution) {
                     setUserSolution(generatedSolution);
@@ -1631,7 +1631,7 @@ export default function AdminCollapsibles({
                     selectedModel,
                     false,
                     true,
-                    true,
+                    true
                   );
                   if (generatedSolution) {
                     setUserSolution(generatedSolution);
