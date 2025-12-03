@@ -122,7 +122,10 @@ async function startWorkflowIfAuto(
   model?: string,
   autoGenerate: boolean = true,
   returnDummy?: boolean,
-  baseProblem?: { problemText: string; direction: "easier" | "harder" },
+  baseProblem?: {
+    problemText: string;
+    direction: "easier" | "harder" | "similar";
+  },
 ): Promise<string | null> {
   if (!autoGenerate) return null;
 
@@ -250,7 +253,7 @@ problems.openapi(createProblemRoute, async (c) => {
 
   // Handle difficulty adjustment if startFrom is provided
   let baseProblem:
-    | { problemText: string; direction: "easier" | "harder" }
+    | { problemText: string; direction: "easier" | "harder" | "similar" }
     | undefined;
   const problemCreateData: {
     generatedByUserId: string;
@@ -268,14 +271,15 @@ problems.openapi(createProblemRoute, async (c) => {
       direction: body.startFrom.direction,
     };
 
-    // Set the FK based on direction
+    // Set the FK based on direction (only for easier/harder, not for similar)
     if (body.startFrom.direction === "harder") {
       // New problem is harder, so the original is easier
       problemCreateData.easierThan = body.startFrom.problemId;
-    } else {
+    } else if (body.startFrom.direction === "easier") {
       // New problem is easier, so the original is harder
       problemCreateData.harderThan = body.startFrom.problemId;
     }
+    // For "similar" direction, we don't set any FK relationships
   }
 
   const problemId = await createProblem(problemCreateData);

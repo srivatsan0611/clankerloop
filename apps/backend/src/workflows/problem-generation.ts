@@ -24,7 +24,10 @@ type WorkflowParams = {
   model: string;
   returnDummy?: boolean;
   startingStep?: GenerationStep; // Optional: skip steps before this one
-  baseProblem?: { problemText: string; direction: "easier" | "harder" }; // For difficulty adjustment
+  baseProblem?: {
+    problemText: string;
+    direction: "easier" | "harder" | "similar";
+  }; // For difficulty adjustment or regeneration
 };
 
 export class ProblemGenerationWorkflow extends WorkflowEntrypoint<

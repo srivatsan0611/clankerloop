@@ -93,6 +93,7 @@ export default function ProblemRender({
   >([{ id: `test-case-${Date.now()}`, inputText: "" }]);
   const hasInitializedCustomTestCases = useRef(false);
   const [isAdjustingDifficulty, setIsAdjustingDifficulty] = useState(false);
+  const [isRegeneratingSimilar, setIsRegeneratingSimilar] = useState(false);
 
   const {
     isLoading: isProblemTextLoading,
@@ -506,10 +507,21 @@ export default function ProblemRender({
           </div>
         )}
         {generationError && overallStatus.type === "error" && (
-          <div className="text-xs text-destructive">
-            {typeof generationError === "string"
-              ? generationError
-              : String(generationError)}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs text-destructive">
+              {typeof generationError === "string"
+                ? generationError
+                : String(generationError)}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRegenerateSimilar}
+              disabled={isRegeneratingSimilar || !selectedModel}
+              className="h-6 text-xs"
+            >
+              {isRegeneratingSimilar ? "Creating..." : "Try Again"}
+            </Button>
           </div>
         )}
       </div>
@@ -714,6 +726,25 @@ export default function ProblemRender({
     }
   };
 
+  const handleRegenerateSimilar = async () => {
+    if (!selectedModel) return;
+    setIsRegeneratingSimilar(true);
+    try {
+      const result = await createProblem(
+        selectedModel,
+        user.apiKey,
+        true,
+        undefined,
+        { problemId, direction: "similar" },
+      );
+      router.push(`/problem/${result.problemId}`);
+    } catch (error) {
+      console.error("Failed to regenerate similar problem:", error);
+    } finally {
+      setIsRegeneratingSimilar(false);
+    }
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <div className="w-full p-4 flex items-center justify-between gap-4 border-b flex-shrink-0">
@@ -749,7 +780,9 @@ export default function ProblemRender({
               variant="outline"
               size="sm"
               onClick={() => handleAdjustDifficulty("easier")}
-              disabled={isAdjustingDifficulty || !selectedModel}
+              disabled={
+                isAdjustingDifficulty || isRegeneratingSimilar || !selectedModel
+              }
             >
               {isAdjustingDifficulty ? "Creating..." : "Make Easier"}
             </Button>
@@ -757,10 +790,26 @@ export default function ProblemRender({
               variant="outline"
               size="sm"
               onClick={() => handleAdjustDifficulty("harder")}
-              disabled={isAdjustingDifficulty || !selectedModel}
+              disabled={
+                isAdjustingDifficulty || isRegeneratingSimilar || !selectedModel
+              }
             >
               {isAdjustingDifficulty ? "Creating..." : "Make Harder"}
             </Button>
+            {(isWorkflowErrored || isFailed) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRegenerateSimilar}
+                disabled={
+                  isAdjustingDifficulty ||
+                  isRegeneratingSimilar ||
+                  !selectedModel
+                }
+              >
+                {isRegeneratingSimilar ? "Creating..." : "Regenerate Similar"}
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -830,13 +879,6 @@ export default function ProblemRender({
                   )}
                 </Badge>
               </div>
-            )}
-
-            {generationError && (
-              <Alert variant="destructive">
-                <AlertTitle>Generation Error</AlertTitle>
-                <AlertDescription>{generationError}</AlertDescription>
-              </Alert>
             )}
 
             <div className="space-y-4">

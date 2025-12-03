@@ -23,8 +23,8 @@ export const StartFromSchema = z
     problemId: z.string().uuid().openapi({
       description: "ID of existing problem to base this new problem on",
     }),
-    direction: z.enum(["easier", "harder"]).openapi({
-      description: "Direction to adjust difficulty",
+    direction: z.enum(["easier", "harder", "similar"]).openapi({
+      description: "Direction to adjust difficulty or regenerate similar",
     }),
   })
   .openapi("StartFrom");

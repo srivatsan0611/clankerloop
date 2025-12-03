@@ -10,7 +10,10 @@ export async function generateProblemText(
   env: Env,
   forceError?: boolean,
   returnDummy?: boolean,
-  baseProblem?: { problemText: string; direction: "easier" | "harder" },
+  baseProblem?: {
+    problemText: string;
+    direction: "easier" | "harder" | "similar";
+  },
 ) {
   if (forceError) {
     throw new Error("Force error: generateObject call skipped");
@@ -36,7 +39,29 @@ export async function generateProblemText(
     // Build prompt based on whether we're creating a new problem or adjusting difficulty
     let prompt: string;
     if (baseProblem) {
-      prompt = `You are adjusting the difficulty of an existing coding problem.
+      if (baseProblem.direction === "similar") {
+        prompt = `You are regenerating a coding problem with the same difficulty level but more specific to avoid generation errors.
+
+Original problem:
+${baseProblem.problemText}
+
+Create a problem with the same difficulty level, but be more specific and clear to avoid generation errors. Keep the same general concept/theme.
+- Be more explicit about constraints and requirements
+- Clarify edge cases and input/output formats
+- Ensure the problem description is unambiguous and specific
+- Maintain the same algorithmic complexity and difficulty
+
+ONLY return the problem text, no other text.
+DO NOT INCLUDE TEST CASES. JUST THE PROBLEM TEXT.
+DO NOT INCLUDE EXAMPLE INPUTS AND OUTPUTS.
+DO NOT INCLUDE ANYTHING BUT THE PROBLEM TEXT.
+Generate a function signature for the function using TypeScript types.
+If using custom types, THEY MUST BE DEFINED INLINE -- for example,
+
+(nums: number[], k: number, customType: {something: string; anotherThing: number}): number
+`;
+      } else {
+        prompt = `You are adjusting the difficulty of an existing coding problem.
 
 Original problem:
 ${baseProblem.problemText}
@@ -53,6 +78,7 @@ If using custom types, THEY MUST BE DEFINED INLINE -- for example,
 
 (nums: number[], k: number, customType: {something: string; anotherThing: number}): number
 `;
+      }
     } else {
       prompt = `Generate a coding problem for a LeetCode-style platform. ONLY return the problem text, no other text.
 	DO NOT INCLUDE TEST CASES. JUST THE PROBLEM TEXT.
