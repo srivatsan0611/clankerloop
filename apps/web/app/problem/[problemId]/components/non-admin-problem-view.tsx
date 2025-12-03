@@ -261,7 +261,7 @@ export default function NonAdminProblemView({
   // Top-level status indicator component
   const TopLevelStatusIndicator = () => {
     return (
-      <div className="border rounded-lg p-3 bg-muted/50 space-y-2">
+      <div className="border border-border rounded-lg p-3 bg-accent space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {overallStatus.type === "generating" && (
@@ -311,14 +311,14 @@ export default function NonAdminProblemView({
   };
 
   return (
-    <div className="h-full overflow-auto p-4 flex flex-col gap-6">
+    <div className="h-full overflow-auto p-4 flex flex-col gap-6 bg-card">
       <TopLevelStatusIndicator />
 
       {/* Focus Areas Section */}
       <Collapsible
         open={focusAreasOpen}
         onOpenChange={setFocusAreasOpen}
-        className="border rounded-lg p-3 bg-muted/50"
+        className="border border-border rounded-lg p-3 bg-secondary"
       >
         <CollapsibleTrigger className="w-full">
           <div className="flex items-center justify-between gap-2 w-full">
@@ -462,7 +462,7 @@ export default function NonAdminProblemView({
             {sampleTestCasesWithData.map((item, i) => (
               <div
                 key={`sample-testcase-${i}`}
-                className="border rounded-lg p-3 bg-muted/30 space-y-2 overflow-hidden"
+                className="border border-border rounded-lg p-3 bg-muted space-y-2 overflow-hidden"
               >
                 <div className="text-sm font-medium mb-1">
                   Test Case {i + 1}

@@ -30,7 +30,7 @@ import Link from "next/link";
 import { ClientFacingUserObject } from "@/lib/auth-types";
 import { signOutAction } from "@/app/(auth)/signout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2Icon, PlayIcon } from "lucide-react";
+import { Loader2Icon, PlayIcon, SendIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -38,6 +38,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AdminCollapsibles from "./admin-collapsibles";
 import NonAdminProblemView from "./non-admin-problem-view";
 import CustomTestInputs from "./custom-test-inputs";
@@ -56,6 +66,7 @@ export default function ProblemRender({
   const [selectedModel, setSelectedModel] = useState<string>("");
   const runCustomTestsRef = useRef<(() => Promise<void>) | null>(null);
   const [canRunCustomTests, setCanRunCustomTests] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
 
   const {
     isLoading: isProblemTextLoading,
@@ -258,8 +269,8 @@ export default function ProblemRender({
   ]);
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <div className="w-full p-4 flex items-center justify-between gap-4 border-b flex-shrink-0">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-muted">
+      <div className="w-full p-4 flex items-center justify-between gap-4 border-b border-border bg-card flex-shrink-0">
         <div className="flex items-center gap-4">
           <Link href="/">
             <h1
@@ -382,7 +393,7 @@ export default function ProblemRender({
         <ResizablePanel defaultSize={50} className="min-h-0 flex flex-col">
           <ResizablePanelGroup direction="vertical" className="flex-1">
             <ResizablePanel defaultSize={50} className="min-h-0 flex flex-col">
-              <div className="flex items-center justify-between p-2 border-b flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-border bg-card flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <Select
                     value={language}
@@ -403,27 +414,7 @@ export default function ProblemRender({
                     <Loader2Icon className="h-4 w-4 animate-spin" />
                   )}
                   <Button
-                    variant="default"
-                    size="sm"
-                    className="h-7"
-                    onClick={async () => {
-                      try {
-                        await callRunUserSolution();
-                      } catch (error) {
-                        console.error("Failed to run user solution:", error);
-                      }
-                    }}
-                    disabled={isRunUserSolutionLoading || !userSolution}
-                  >
-                    {isRunUserSolutionLoading ? (
-                      <Loader2Icon className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <PlayIcon className="h-4 w-4 mr-1" />
-                    )}
-                    Run Solution
-                  </Button>
-                  <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
                     className="h-7"
                     onClick={async () => {
@@ -432,14 +423,57 @@ export default function ProblemRender({
                       }
                     }}
                     disabled={isRunCustomTestsLoading || !canRunCustomTests}
+                    title="Run your solution on custom test cases"
                   >
                     {isRunCustomTestsLoading ? (
                       <Loader2Icon className="h-4 w-4 mr-1 animate-spin" />
                     ) : (
                       <PlayIcon className="h-4 w-4 mr-1" />
                     )}
-                    Run
+                    Run Custom Tests
                   </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-7"
+                    onClick={() => setShowSubmitDialog(true)}
+                    disabled={isRunUserSolutionLoading || !userSolution}
+                    title="Submit your solution for evaluation on all test cases"
+                  >
+                    {isRunUserSolutionLoading ? (
+                      <Loader2Icon className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <SendIcon className="h-4 w-4 mr-1" />
+                    )}
+                    Submit Solution
+                  </Button>
+                  <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Submit Solution?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will run your solution against all test cases and submit it for evaluation. 
+                          Make sure you've tested your solution with custom test cases first.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={async () => {
+                            try {
+                              await callRunUserSolution();
+                              setShowSubmitDialog(false);
+                            } catch (error) {
+                              console.error("Failed to run user solution:", error);
+                              setShowSubmitDialog(false);
+                            }
+                          }}
+                        >
+                          Submit
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
                 {starterCodeError && (
                   <span className="text-xs text-destructive">

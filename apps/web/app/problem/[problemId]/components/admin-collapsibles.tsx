@@ -525,7 +525,7 @@ export default function AdminCollapsibles({
   // Top-level status indicator component
   const TopLevelStatusIndicator = () => {
     return (
-      <div className="border rounded-lg p-3 bg-muted/50 space-y-2">
+      <div className="border border-border rounded-lg p-3 bg-accent space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {overallStatus.type === "generating" && (
@@ -751,7 +751,7 @@ export default function AdminCollapsibles({
   };
 
   return (
-    <div className="h-full overflow-auto p-4 flex flex-col gap-4">
+    <div className="h-full overflow-auto p-4 flex flex-col gap-4 bg-card">
       <div className="space-y-1">
         <div className="font-semibold">Problem: {problemId}</div>
         {problemModel && (
@@ -772,7 +772,7 @@ export default function AdminCollapsibles({
             focusAreas: open,
           }));
         }}
-        className="border rounded-lg p-3 bg-muted/50"
+        className="border border-border rounded-lg p-3 bg-secondary"
       >
         <CollapsibleTrigger className="w-full">
           <div className="flex items-center justify-between gap-2 w-full">
@@ -1177,7 +1177,7 @@ export default function AdminCollapsibles({
               {userSolutionTestResults.map((testResult, i) => (
                 <div
                   key={`user-solution-test-result-${i}`}
-                  className="border rounded-lg p-3 bg-muted/30"
+                  className="border border-border rounded-lg p-3 bg-muted"
                 >
                   <div className="text-xs font-medium text-muted-foreground mb-2">
                     {testResult.testCase.description}
@@ -1315,7 +1315,7 @@ export default function AdminCollapsibles({
               return (
                 <div
                   key={testCase.id}
-                  className="space-y-2 border rounded-lg p-3 bg-muted/30 overflow-x-hidden"
+                  className="space-y-2 border border-border rounded-lg p-3 bg-muted overflow-x-hidden"
                 >
                   <div className="flex items-start gap-2">
                     <div className="flex-1 space-y-2 min-w-0">

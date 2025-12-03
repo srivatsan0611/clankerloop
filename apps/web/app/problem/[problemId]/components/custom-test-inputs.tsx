@@ -210,9 +210,9 @@ export default function CustomTestInputs({
   const showCustomTests = viewMode === "custom";
 
   return (
-    <div className="h-full flex flex-col overflow-hidden py-2">
+    <div className="h-full flex flex-col overflow-hidden py-2 bg-card">
       {/* Header with View Toggle */}
-      <div className="flex items-center justify-between border-b flex-shrink-0 bg-background">
+      <div className="flex items-center justify-between border-b border-border flex-shrink-0 bg-card">
         <div className="flex items-center gap-2 pb-2">
           <span className="text-sm font-medium px-3">Test Results</span>
           <div className="flex gap-1 border rounded-md p-0.5">
@@ -282,13 +282,13 @@ export default function CustomTestInputs({
 
       {/* Custom Tests View */}
       {showCustomTests && (
-        <div className="w-full h-full bg-muted/30">
+        <div className="w-full h-full bg-muted">
           <Tabs
             value={selectedTab}
             onValueChange={setSelectedTab}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            <TabsList className="justify-start rounded-none border-b p-0 h-auto bg-transparent">
+            <TabsList className="justify-start rounded-none border-b border-border p-0 h-auto bg-secondary">
               {customTestCases.map((testCase, index) => {
                 const result =
                   customTestResults && customTestResults[index]
@@ -497,7 +497,7 @@ export default function CustomTestInputs({
           onValueChange={setSelectedTab}
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="justify-start rounded-none border-b p-0 h-auto">
+          <TabsList className="justify-start rounded-none border-b border-border p-0 h-auto bg-secondary">
             {userSolutionTestResults!.map((testResult, index) => {
               const isPassing = testResult.status === "pass";
               const isFailing =
