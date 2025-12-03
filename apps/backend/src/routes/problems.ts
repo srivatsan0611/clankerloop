@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
+import { HTTPException } from "hono/http-exception";
 import {
   generateProblemText,
   getProblemText,
@@ -67,6 +68,7 @@ const problems = new OpenAPIHono<{
   Bindings: Env;
   Variables: {
     userId: string;
+    isAdmin: boolean;
     db: Database;
   };
 }>();
@@ -123,7 +125,7 @@ async function shouldReturnIdempotentError(
 
 // Helper to start workflow if autoGenerate is enabled (for problem creation)
 async function startWorkflowIfAuto(
-  c: Context<{ Bindings: Env; Variables: { userId: string; db: Database } }>,
+  c: Context<{ Bindings: Env; Variables: { userId: string; isAdmin: boolean; db: Database } }>,
   problemId: string,
   model?: string,
   autoGenerate: boolean = true,
@@ -158,7 +160,7 @@ async function startWorkflowIfAuto(
 
 // Helper to start workflow from a specific step if enqueueNextStep is enabled
 async function startWorkflowFromStepIfEnabled(
-  c: Context<{ Bindings: Env; Variables: { userId: string; db: Database } }>,
+  c: Context<{ Bindings: Env; Variables: { userId: string; isAdmin: boolean; db: Database } }>,
   problemId: string,
   currentStep: GenerationStep,
   model?: string,
@@ -718,6 +720,14 @@ problems.openapi(generateInputCodeRoute, async (c) => {
 problems.openapi(getInputCodeRoute, async (c) => {
   const db = c.get("db");
   const { problemId } = c.req.valid("param");
+  const isAdmin = c.get("isAdmin");
+
+  // Check admin access
+  if (!isAdmin) {
+    throw new HTTPException(403, {
+      message: "Admin access required. This endpoint is only accessible to administrators.",
+    });
+  }
 
   // Validate prerequisite: test cases must exist
   const problem = await getProblem(problemId, db);
@@ -814,6 +824,7 @@ problems.openapi(generateInputsRoute, async (c) => {
 problems.openapi(getInputsRoute, async (c) => {
   const db = c.get("db");
   const { problemId } = c.req.valid("param");
+  const isAdmin = c.get("isAdmin");
 
   // Validate prerequisite: all test cases must have inputCode
   const problem = await getProblem(problemId, db);
@@ -835,7 +846,20 @@ problems.openapi(getInputsRoute, async (c) => {
     );
   }
 
-  const result = await getTestCaseInputs(problemId, db);
+  const allInputs = await getTestCaseInputs(problemId, db);
+  
+  // If admin, return all inputs; if not admin, only return inputs for sample test cases
+  let result: unknown[];
+  if (isAdmin) {
+    result = allInputs;
+  } else {
+    // Filter to only include inputs for sample test cases
+    result = problem.testCases
+      .filter((tc) => tc.isSampleCase)
+      .map((tc) => tc.input)
+      .filter((input) => input !== null && input !== undefined);
+  }
+  
   return c.json({ success: true as const, data: result }, 200);
 });
 
@@ -947,6 +971,14 @@ problems.openapi(generateSolutionRoute, async (c) => {
 problems.openapi(getSolutionRoute, async (c) => {
   const db = c.get("db");
   const { problemId } = c.req.valid("param");
+  const isAdmin = c.get("isAdmin");
+
+  // Check admin access
+  if (!isAdmin) {
+    throw new HTTPException(403, {
+      message: "Admin access required. This endpoint is only accessible to administrators.",
+    });
+  }
 
   // Validate prerequisite: all test cases must have input field populated
   const problem = await getProblem(problemId, db);
@@ -1085,6 +1117,14 @@ problems.openapi(generateOutputsRoute, async (c) => {
 problems.openapi(getOutputsRoute, async (c) => {
   const db = c.get("db");
   const { problemId } = c.req.valid("param");
+  const isAdmin = c.get("isAdmin");
+
+  // Check admin access
+  if (!isAdmin) {
+    throw new HTTPException(403, {
+      message: "Admin access required. This endpoint is only accessible to administrators.",
+    });
+  }
 
   // Validate prerequisite: solution must exist
   const problem = await getProblem(problemId, db);

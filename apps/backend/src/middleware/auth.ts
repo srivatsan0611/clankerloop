@@ -35,3 +35,15 @@ export const apiKeyAuth = createMiddleware(async (c, next) => {
 
   await next();
 });
+
+export const requireAdmin = createMiddleware(async (c, next) => {
+  const isAdmin = c.get("isAdmin");
+  
+  if (!isAdmin) {
+    throw new HTTPException(403, {
+      message: "Admin access required. This endpoint is only accessible to administrators.",
+    });
+  }
+
+  await next();
+});

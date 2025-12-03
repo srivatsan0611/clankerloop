@@ -42,6 +42,7 @@ const api = new OpenAPIHono<{
   Bindings: Env;
   Variables: {
     userId: string;
+    isAdmin: boolean;
     db: Database;
   };
 }>();
