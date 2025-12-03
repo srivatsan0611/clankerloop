@@ -39,7 +39,9 @@ export default async function Home() {
     // Fetch focus areas from database (server-side, no auth needed)
     const focusAreas = await listFocusAreasFromDb();
 
-    return <NewProblemPageWrapper user={clientFacingUser} focusAreas={focusAreas} />;
+    return (
+      <NewProblemPageWrapper user={clientFacingUser} focusAreas={focusAreas} />
+    );
   }
 
   // User is not logged in - fetch focus areas and show the new problem page
