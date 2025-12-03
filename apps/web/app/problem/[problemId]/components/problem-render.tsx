@@ -152,7 +152,7 @@ export default function ProblemRender({
     problemId,
     userSolution,
     language,
-    user.apiKey
+    user.apiKey,
   );
 
   const {
@@ -472,7 +472,7 @@ export default function ProblemRender({
                             } catch (error) {
                               console.error(
                                 "Failed to run user solution:",
-                                error
+                                error,
                               );
                               setShowSubmitDialog(false);
                             }

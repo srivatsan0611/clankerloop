@@ -41,7 +41,7 @@ export default function NewProblemView({
         return ids.filter((id) => focusAreas.some((area) => area.id === id));
       }
       return [];
-    }
+    },
   );
 
   // Auto-generate if flag is set and user is logged in
@@ -74,7 +74,7 @@ export default function NewProblemView({
         true, // autoGenerate
         undefined, // returnDummy
         undefined, // startFrom
-        selectedFocusAreaIds.length > 0 ? selectedFocusAreaIds : undefined
+        selectedFocusAreaIds.length > 0 ? selectedFocusAreaIds : undefined,
       );
       router.push(`/problem/${result.problemId}`);
     } catch (error) {
