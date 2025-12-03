@@ -1,5 +1,5 @@
 import { eq, desc } from "drizzle-orm";
-import db from "../index";
+import defaultDb, { type Database } from "../index";
 import {
   models,
   problems,
@@ -27,15 +27,22 @@ export type {
   NewGenerationJob,
 };
 
+// Re-export Database type
+export type { Database };
+
 // Problem with test cases type for getProblem
 export type ProblemWithTestCases = Problem & {
   testCases: TestCase[];
 };
 
+// Helper to get db instance (use provided or default)
+const getDb = (db?: Database): Database => db ?? defaultDb;
+
 // Model functions
 
-export async function createModel(name: string): Promise<string> {
-  const [result] = await db
+export async function createModel(name: string, db?: Database): Promise<string> {
+  const database = getDb(db);
+  const [result] = await database
     .insert(models)
     .values({ name })
     .returning({ id: models.id });
@@ -47,30 +54,35 @@ export async function createModel(name: string): Promise<string> {
   return result.id;
 }
 
-export async function getModel(modelId: string): Promise<Model | null> {
-  const model = await db.query.models.findFirst({
+export async function getModel(modelId: string, db?: Database): Promise<Model | null> {
+  const database = getDb(db);
+  const model = await database.query.models.findFirst({
     where: eq(models.id, modelId),
   });
   return model ?? null;
 }
 
-export async function getModelByName(name: string): Promise<Model | null> {
-  const model = await db.query.models.findFirst({
+export async function getModelByName(name: string, db?: Database): Promise<Model | null> {
+  const database = getDb(db);
+  const model = await database.query.models.findFirst({
     where: eq(models.name, name),
   });
   return model ?? null;
 }
 
-export async function listModels(): Promise<Model[]> {
-  return db.query.models.findMany({
+export async function listModels(db?: Database): Promise<Model[]> {
+  const database = getDb(db);
+  return database.query.models.findMany({
     orderBy: models.name,
   });
 }
 
 export async function getModelForProblem(
   problemId: string,
+  db?: Database,
 ): Promise<string | null> {
-  const problem = await db.query.problems.findFirst({
+  const database = getDb(db);
+  const problem = await database.query.problems.findFirst({
     where: eq(problems.id, problemId),
   });
 
@@ -78,7 +90,7 @@ export async function getModelForProblem(
     return null;
   }
 
-  const model = await getModel(problem.generatedByModelId);
+  const model = await getModel(problem.generatedByModelId, db);
   return model?.name ?? null;
 }
 
@@ -86,12 +98,14 @@ export async function getModelForProblem(
 
 export async function createProblem(
   data?: Partial<NewProblem>,
+  db?: Database,
 ): Promise<string> {
   if (!data?.generatedByUserId) {
     throw new Error("generatedByUserId is required");
   }
 
-  const [result] = await db
+  const database = getDb(db);
+  const [result] = await database
     .insert(problems)
     .values({
       problemText: data?.problemText ?? "",
@@ -111,8 +125,10 @@ export async function createProblem(
 
 export async function getProblem(
   problemId: string,
+  db?: Database,
 ): Promise<ProblemWithTestCases> {
-  const problem = await db.query.problems.findFirst({
+  const database = getDb(db);
+  const problem = await database.query.problems.findFirst({
     where: eq(problems.id, problemId),
   });
 
@@ -120,7 +136,7 @@ export async function getProblem(
     throw new Error(`Problem not found: ${problemId}`);
   }
 
-  const problemTestCases = await db.query.testCases.findMany({
+  const problemTestCases = await database.query.testCases.findMany({
     where: eq(testCases.problemId, problemId),
     orderBy: testCases.createdAt,
   });
@@ -134,8 +150,10 @@ export async function getProblem(
 export async function updateProblem(
   problemId: string,
   data: Partial<Omit<NewProblem, "id">>,
+  db?: Database,
 ): Promise<void> {
-  await db
+  const database = getDb(db);
+  await database
     .update(problems)
     .set({
       ...data,
@@ -144,8 +162,9 @@ export async function updateProblem(
     .where(eq(problems.id, problemId));
 }
 
-export async function listProblems(): Promise<string[]> {
-  const result = await db
+export async function listProblems(db?: Database): Promise<string[]> {
+  const database = getDb(db);
+  const result = await database
     .select({ id: problems.id })
     .from(problems)
     .orderBy(problems.createdAt);
@@ -158,8 +177,10 @@ export async function listProblems(): Promise<string[]> {
 export async function createTestCase(
   problemId: string,
   data: Omit<NewTestCase, "id" | "problemId" | "createdAt">,
+  db?: Database,
 ): Promise<string> {
-  const [result] = await db
+  const database = getDb(db);
+  const [result] = await database
     .insert(testCases)
     .values({
       problemId,
@@ -182,18 +203,23 @@ export async function createTestCase(
 export async function updateTestCase(
   testCaseId: string,
   data: Partial<Omit<NewTestCase, "id" | "problemId" | "createdAt">>,
+  db?: Database,
 ): Promise<void> {
-  await db.update(testCases).set(data).where(eq(testCases.id, testCaseId));
+  const database = getDb(db);
+  await database.update(testCases).set(data).where(eq(testCases.id, testCaseId));
 }
 
-export async function deleteTestCases(problemId: string): Promise<void> {
-  await db.delete(testCases).where(eq(testCases.problemId, problemId));
+export async function deleteTestCases(problemId: string, db?: Database): Promise<void> {
+  const database = getDb(db);
+  await database.delete(testCases).where(eq(testCases.problemId, problemId));
 }
 
 export async function getTestCasesByProblemId(
   problemId: string,
+  db?: Database,
 ): Promise<TestCase[]> {
-  return db.query.testCases.findMany({
+  const database = getDb(db);
+  return database.query.testCases.findMany({
     where: eq(testCases.problemId, problemId),
   });
 }
@@ -201,10 +227,12 @@ export async function getTestCasesByProblemId(
 export async function createTestCases(
   problemId: string,
   data: Omit<NewTestCase, "id" | "problemId" | "createdAt">[],
+  db?: Database,
 ): Promise<TestCase[]> {
   if (data.length === 0) return [];
 
-  return db
+  const database = getDb(db);
+  return database
     .insert(testCases)
     .values(
       data.map((tc) => ({
@@ -223,10 +251,11 @@ export async function createTestCases(
 export async function replaceTestCases(
   problemId: string,
   data: Omit<NewTestCase, "id" | "problemId" | "createdAt">[],
+  db?: Database,
 ): Promise<TestCase[]> {
   // Delete existing test cases and insert new ones
-  await deleteTestCases(problemId);
-  return createTestCases(problemId, data);
+  await deleteTestCases(problemId, db);
+  return createTestCases(problemId, data, db);
 }
 
 // Generation Job functions
@@ -234,8 +263,10 @@ export async function replaceTestCases(
 export async function createGenerationJob(
   problemId: string,
   modelId?: string,
+  db?: Database,
 ): Promise<string> {
-  const [result] = await db
+  const database = getDb(db);
+  const [result] = await database
     .insert(generationJobs)
     .values({
       problemId,
@@ -254,8 +285,10 @@ export async function createGenerationJob(
 
 export async function getGenerationJob(
   jobId: string,
+  db?: Database,
 ): Promise<GenerationJob | null> {
-  const job = await db.query.generationJobs.findFirst({
+  const database = getDb(db);
+  const job = await database.query.generationJobs.findFirst({
     where: eq(generationJobs.id, jobId),
   });
   return job ?? null;
@@ -263,8 +296,10 @@ export async function getGenerationJob(
 
 export async function getLatestJobForProblem(
   problemId: string,
+  db?: Database,
 ): Promise<GenerationJob | null> {
-  const job = await db.query.generationJobs.findFirst({
+  const database = getDb(db);
+  const job = await database.query.generationJobs.findFirst({
     where: eq(generationJobs.problemId, problemId),
     orderBy: desc(generationJobs.createdAt),
   });
@@ -276,8 +311,10 @@ export async function updateJobStatus(
   status: "pending" | "in_progress" | "completed" | "failed",
   currentStep?: string,
   error?: string,
+  db?: Database,
 ): Promise<void> {
-  await db
+  const database = getDb(db);
+  await database
     .update(generationJobs)
     .set({
       status,
@@ -291,15 +328,17 @@ export async function updateJobStatus(
 export async function markStepComplete(
   jobId: string,
   step: string,
+  db?: Database,
 ): Promise<void> {
-  const job = await getGenerationJob(jobId);
+  const job = await getGenerationJob(jobId, db);
   if (!job) {
     throw new Error(`Generation job not found: ${jobId}`);
   }
 
   const completedSteps = [...(job.completedSteps || []), step];
 
-  await db
+  const database = getDb(db);
+  await database
     .update(generationJobs)
     .set({
       completedSteps,
