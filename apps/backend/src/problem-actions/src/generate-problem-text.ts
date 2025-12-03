@@ -42,7 +42,7 @@ Original problem:
 ${baseProblem.problemText}
 
 Create a ${baseProblem.direction} version of this problem while keeping the same general concept/theme.
-${baseProblem.direction === "easier" ? "- Simplify constraints, reduce edge cases, use smaller inputs, require simpler algorithms" : "- Add constraints, more edge cases, require optimization, larger inputs, more complex algorithms"}
+${baseProblem.direction === "easier" ? "- Simplify constraints, require simpler algorithms" : "- Add constraints, require optimization, more complex algorithms"}
 
 ONLY return the problem text, no other text.
 DO NOT INCLUDE TEST CASES. JUST THE PROBLEM TEXT.
