@@ -44,39 +44,30 @@ export default function NewProblemPageWrapper({
               ClankerRank
             </h1>
           </Link>
-          <Link href="/">
-            <Button variant={"outline"} className="hover:cursor-pointer">
-              Problems
-            </Button>
-          </Link>
+          <p>&middot;</p>
           {user ? (
-            <form
-              action={async () => {
-                await signOutAction();
-              }}
-            >
-              <Button
-                variant={"outline"}
-                className="hover:cursor-pointer"
-                type="submit"
+            <p className="font-comic-relief">
+              hi {user.firstName.toLowerCase()}{" "}
+              <form
+                action={async () => {
+                  await signOutAction();
+                }}
+                className="inline"
               >
-                Sign out
-              </Button>
-            </form>
+                <button
+                  type="submit"
+                  className="text-blue-500 hover:underline hover:cursor-pointer"
+                >
+                  (sign out)
+                </button>
+              </form>
+            </p>
           ) : (
             <Link href="/login">
-              <Button variant={"outline"} className="hover:cursor-pointer">
-                Sign in
-              </Button>
+              <p className="font-comic-relief text-blue-500 hover:underline hover:cursor-pointer">
+                sign in
+              </p>
             </Link>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          {user && (
-            <Avatar>
-              <AvatarImage src={user.profilePictureUrl} />
-              <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
-            </Avatar>
           )}
         </div>
       </div>

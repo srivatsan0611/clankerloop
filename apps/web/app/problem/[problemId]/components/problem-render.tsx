@@ -153,7 +153,7 @@ export default function ProblemRender({
     problemId,
     userSolution,
     language,
-    user.apiKey,
+    user.apiKey
   );
 
   const {
@@ -280,30 +280,25 @@ export default function ProblemRender({
               ClankerRank
             </h1>
           </Link>
-          <Link href="/">
-            <Button variant={"outline"} className="hover:cursor-pointer">
-              Problems
-            </Button>
-          </Link>{" "}
-          <form
-            action={async () => {
-              await signOutAction();
-            }}
-          >
-            <Button
-              variant={"outline"}
-              className="hover:cursor-pointer"
-              type="submit"
-            >
-              Sign out
-            </Button>
-          </form>
-        </div>
-        <div className="flex items-center gap-4">
-          <Avatar>
-            <AvatarImage src={user.profilePictureUrl} />
-            <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <p>&middot;</p>
+          {user && (
+            <p className="font-comic-relief">
+              hi {user.firstName.toLowerCase()}{" "}
+              <form
+                action={async () => {
+                  await signOutAction();
+                }}
+                className="inline"
+              >
+                <button
+                  type="submit"
+                  className="text-blue-500 hover:underline hover:cursor-pointer"
+                >
+                  (sign out)
+                </button>
+              </form>
+            </p>
+          )}
         </div>
       </div>
       <ResizablePanelGroup
@@ -470,7 +465,7 @@ export default function ProblemRender({
                             } catch (error) {
                               console.error(
                                 "Failed to run user solution:",
-                                error,
+                                error
                               );
                               setShowSubmitDialog(false);
                             }
