@@ -27,9 +27,7 @@ import {
 } from "@/hooks/use-problem";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ClientFacingUserObject } from "@/lib/auth-types";
-import { createProblem } from "@/actions/create-problem";
 import { signOutAction } from "@/app/(auth)/signout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2Icon, PlayIcon } from "lucide-react";
@@ -53,12 +51,9 @@ export default function ProblemRender({
   user: ClientFacingUserObject;
   isAdmin: boolean;
 }) {
-  const router = useRouter();
   const [userSolution, setUserSolution] = useState<string | null>(null);
   const [language, setLanguage] = useState<CodeGenLanguage>("typescript");
   const [selectedModel, setSelectedModel] = useState<string>("");
-  const [isAdjustingDifficulty, setIsAdjustingDifficulty] = useState(false);
-  const [isRegeneratingSimilar, setIsRegeneratingSimilar] = useState(false);
   const runCustomTestsRef = useRef<(() => Promise<void>) | null>(null);
   const [canRunCustomTests, setCanRunCustomTests] = useState(false);
 
@@ -262,44 +257,6 @@ export default function ProblemRender({
     getTestCaseOutputs,
   ]);
 
-  const handleAdjustDifficulty = async (direction: "easier" | "harder") => {
-    if (!selectedModel) return;
-    setIsAdjustingDifficulty(true);
-    try {
-      const result = await createProblem(
-        selectedModel,
-        user.apiKey,
-        true,
-        undefined,
-        { problemId, direction }
-      );
-      router.push(`/problem/${result.problemId}`);
-    } catch (error) {
-      console.error("Failed to adjust difficulty:", error);
-    } finally {
-      setIsAdjustingDifficulty(false);
-    }
-  };
-
-  const handleRegenerateSimilar = async () => {
-    if (!selectedModel) return;
-    setIsRegeneratingSimilar(true);
-    try {
-      const result = await createProblem(
-        selectedModel,
-        user.apiKey,
-        true,
-        undefined,
-        { problemId, direction: "similar" }
-      );
-      router.push(`/problem/${result.problemId}`);
-    } catch (error) {
-      console.error("Failed to regenerate similar problem:", error);
-    } finally {
-      setIsRegeneratingSimilar(false);
-    }
-  };
-
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <div className="w-full p-4 flex items-center justify-between gap-4 border-b flex-shrink-0">
@@ -330,42 +287,6 @@ export default function ProblemRender({
               Sign out
             </Button>
           </form>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleAdjustDifficulty("easier")}
-              disabled={
-                isAdjustingDifficulty || isRegeneratingSimilar || !selectedModel
-              }
-            >
-              {isAdjustingDifficulty ? "Creating..." : "Make Easier"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleAdjustDifficulty("harder")}
-              disabled={
-                isAdjustingDifficulty || isRegeneratingSimilar || !selectedModel
-              }
-            >
-              {isAdjustingDifficulty ? "Creating..." : "Make Harder"}
-            </Button>
-            {(isWorkflowErrored || isFailed) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRegenerateSimilar}
-                disabled={
-                  isAdjustingDifficulty ||
-                  isRegeneratingSimilar ||
-                  !selectedModel
-                }
-              >
-                {isRegeneratingSimilar ? "Creating..." : "Regenerate Similar"}
-              </Button>
-            )}
-          </div>
         </div>
         <div className="flex items-center gap-4">
           <Avatar>
@@ -450,6 +371,10 @@ export default function ProblemRender({
               isGenerating={isGenerating}
               isFailed={isFailed}
               generationError={generationError}
+              problemId={problemId}
+              user={user}
+              selectedModel={selectedModel}
+              isWorkflowErrored={isWorkflowErrored}
             />
           )}
         </ResizablePanel>

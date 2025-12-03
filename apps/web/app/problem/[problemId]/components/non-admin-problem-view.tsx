@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Loader2Icon,
   CheckCircle2Icon,
@@ -10,6 +11,9 @@ import {
   ClockIcon,
 } from "lucide-react";
 import type { GenerationStep } from "@/hooks/use-problem";
+import { useRouter } from "next/navigation";
+import { createProblem } from "@/actions/create-problem";
+import { ClientFacingUserObject } from "@/lib/auth-types";
 
 // Step order matching backend STEP_ORDER
 const STEP_ORDER: GenerationStep[] = [
@@ -47,6 +51,11 @@ interface NonAdminProblemViewProps {
   isGenerating: boolean;
   isFailed: boolean;
   generationError: unknown;
+  // Additional props for difficulty adjustment
+  problemId: string;
+  user: ClientFacingUserObject;
+  selectedModel: string;
+  isWorkflowErrored: boolean;
 }
 
 export default function NonAdminProblemView({
@@ -59,7 +68,14 @@ export default function NonAdminProblemView({
   isGenerating,
   isFailed,
   generationError,
+  problemId,
+  user,
+  selectedModel,
+  isWorkflowErrored,
 }: NonAdminProblemViewProps) {
+  const router = useRouter();
+  const [isAdjustingDifficulty, setIsAdjustingDifficulty] = useState(false);
+  const [isRegeneratingSimilar, setIsRegeneratingSimilar] = useState(false);
   // Filter to sample test cases only
   const sampleTestCases = testCases
     ? testCases.filter((tc) => tc.isSampleCase === true)
@@ -124,6 +140,47 @@ export default function NonAdminProblemView({
     return { type: "idle" as const, message: "Ready to generate" };
   }, [isFailed, isGenerating, currentStep, completedSteps]);
 
+  const handleAdjustDifficulty = async (direction: "easier" | "harder") => {
+    if (!selectedModel) return;
+    setIsAdjustingDifficulty(true);
+    try {
+      const result = await createProblem(
+        selectedModel,
+        user.apiKey,
+        true,
+        undefined,
+        { problemId, direction }
+      );
+      router.push(`/problem/${result.problemId}`);
+    } catch (error) {
+      console.error("Failed to adjust difficulty:", error);
+    } finally {
+      setIsAdjustingDifficulty(false);
+    }
+  };
+
+  const handleRegenerateSimilar = async () => {
+    if (!selectedModel) return;
+    setIsRegeneratingSimilar(true);
+    try {
+      const result = await createProblem(
+        selectedModel,
+        user.apiKey,
+        true,
+        undefined,
+        { problemId, direction: "similar" }
+      );
+      router.push(`/problem/${result.problemId}`);
+    } catch (error) {
+      console.error("Failed to regenerate similar problem:", error);
+    } finally {
+      setIsRegeneratingSimilar(false);
+    }
+  };
+
+  // Check if generation is complete
+  const isGenerationComplete = completedSteps.length === STEP_ORDER.length;
+
   // Top-level status indicator component
   const TopLevelStatusIndicator = () => {
     return (
@@ -179,6 +236,58 @@ export default function NonAdminProblemView({
   return (
     <div className="h-full overflow-auto p-4 flex flex-col gap-6">
       <TopLevelStatusIndicator />
+
+      {/* Adjust Difficulty Buttons */}
+      <div className="flex gap-2 w-full">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={() => handleAdjustDifficulty("easier")}
+          disabled={
+            isAdjustingDifficulty ||
+            isRegeneratingSimilar ||
+            !selectedModel ||
+            isGenerating ||
+            !isGenerationComplete
+          }
+        >
+          {isAdjustingDifficulty ? "Creating..." : "Make Easier"}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={() => handleAdjustDifficulty("harder")}
+          disabled={
+            isAdjustingDifficulty ||
+            isRegeneratingSimilar ||
+            !selectedModel ||
+            isGenerating ||
+            !isGenerationComplete
+          }
+        >
+          {isAdjustingDifficulty ? "Creating..." : "Make Harder"}
+        </Button>
+        {(isWorkflowErrored || isFailed) && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleRegenerateSimilar}
+            disabled={
+              isAdjustingDifficulty ||
+              isRegeneratingSimilar ||
+              !selectedModel ||
+              isGenerating ||
+              !isGenerationComplete
+            }
+          >
+            {isRegeneratingSimilar ? "Creating..." : "Regenerate Similar"}
+          </Button>
+        )}
+      </div>
+
       {/* Problem Text Reworded */}
       {problemText?.problemTextReworded && (
         <div className="space-y-2">

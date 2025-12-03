@@ -32,6 +32,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ClientFacingUserObject } from "@/lib/auth-types";
 import type { CodeGenLanguage } from "@/hooks/use-problem";
+import { useRouter } from "next/navigation";
+import { createProblem } from "@/actions/create-problem";
 
 // Step order matching backend STEP_ORDER
 const STEP_ORDER: GenerationStep[] = [
@@ -224,6 +226,7 @@ export default function AdminCollapsibles({
   callGenerateSolutionWithModel,
 }: AdminCollapsiblesProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [lastValidStepIndex, setLastValidStepIndex] = useState<number>(-1);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [testCaseInputsOpen, setTestCaseInputsOpen] = useState<boolean>(true);
@@ -232,6 +235,8 @@ export default function AdminCollapsibles({
     Array<{ id: string; inputText: string }>
   >([{ id: `test-case-${Date.now()}`, inputText: "" }]);
   const hasInitializedCustomTestCases = useRef(false);
+  const [isAdjustingDifficulty, setIsAdjustingDifficulty] = useState(false);
+  const [isRegeneratingSimilar, setIsRegeneratingSimilar] = useState(false);
 
   // Update lastValidStepIndex based on completed steps
   useEffect(() => {
@@ -396,6 +401,47 @@ export default function AdminCollapsibles({
     }
     return { type: "idle" as const, message: "Ready to generate" };
   }, [isFailed, isGenerating, currentStep, completedSteps]);
+
+  const handleAdjustDifficulty = async (direction: "easier" | "harder") => {
+    if (!selectedModel) return;
+    setIsAdjustingDifficulty(true);
+    try {
+      const result = await createProblem(
+        selectedModel,
+        user.apiKey,
+        true,
+        undefined,
+        { problemId, direction }
+      );
+      router.push(`/problem/${result.problemId}`);
+    } catch (error) {
+      console.error("Failed to adjust difficulty:", error);
+    } finally {
+      setIsAdjustingDifficulty(false);
+    }
+  };
+
+  const handleRegenerateSimilar = async () => {
+    if (!selectedModel) return;
+    setIsRegeneratingSimilar(true);
+    try {
+      const result = await createProblem(
+        selectedModel,
+        user.apiKey,
+        true,
+        undefined,
+        { problemId, direction: "similar" }
+      );
+      router.push(`/problem/${result.problemId}`);
+    } catch (error) {
+      console.error("Failed to regenerate similar problem:", error);
+    } finally {
+      setIsRegeneratingSimilar(false);
+    }
+  };
+
+  // Check if generation is complete
+  const isGenerationComplete = completedSteps.length === STEP_ORDER.length;
 
   // Top-level status indicator component
   const TopLevelStatusIndicator = () => {
@@ -637,6 +683,57 @@ export default function AdminCollapsibles({
       </div>
 
       <TopLevelStatusIndicator />
+
+      {/* Adjust Difficulty Buttons */}
+      <div className="flex gap-2 w-full">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={() => handleAdjustDifficulty("easier")}
+          disabled={
+            isAdjustingDifficulty ||
+            isRegeneratingSimilar ||
+            !selectedModel ||
+            isGenerating ||
+            !isGenerationComplete
+          }
+        >
+          {isAdjustingDifficulty ? "Creating..." : "Make Easier"}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={() => handleAdjustDifficulty("harder")}
+          disabled={
+            isAdjustingDifficulty ||
+            isRegeneratingSimilar ||
+            !selectedModel ||
+            isGenerating ||
+            !isGenerationComplete
+          }
+        >
+          {isAdjustingDifficulty ? "Creating..." : "Make Harder"}
+        </Button>
+        {(isWorkflowErrored || isFailed) && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleRegenerateSimilar}
+            disabled={
+              isAdjustingDifficulty ||
+              isRegeneratingSimilar ||
+              !selectedModel ||
+              isGenerating ||
+              !isGenerationComplete
+            }
+          >
+            {isRegeneratingSimilar ? "Creating..." : "Regenerate Similar"}
+          </Button>
+        )}
+      </div>
 
       {workflowStatus && (
         <div className="space-y-1">
