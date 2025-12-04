@@ -1,5 +1,5 @@
 {
-  "name": "ClankerLoop",
+  "name": "clankerrank",
   "compatibility_date": "2025-11-27",
   "main": "src/index.ts",
   "compatibility_flags": ["nodejs_compat"],
