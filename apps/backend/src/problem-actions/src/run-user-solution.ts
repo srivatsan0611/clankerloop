@@ -56,6 +56,35 @@ export async function runUserSolution(
     await sandbox.uploadFile(Buffer.from(preparedCode, "utf-8"), solutionPath);
     await sandbox.uploadFile(Buffer.from(runnerTemplate, "utf-8"), runnerPath);
 
+    // For C++, compile the code first
+    if (language === "cpp") {
+      // Combine solution and runner into single file for compilation
+      const combinedCode = `${preparedCode}\n\n${runnerTemplate}`;
+      const combinedPath = `${WORK_DIR}/combined.cpp`;
+      await sandbox.uploadFile(Buffer.from(combinedCode, "utf-8"), combinedPath);
+
+      // Compile C++ code
+      const compileCommand = `g++ -std=c++17 -O2 -Wall -Wextra -I/usr/local/include ${combinedPath} -o ${WORK_DIR}/runner`;
+      const compileResult = await sandbox.executeCommand(
+        compileCommand,
+        WORK_DIR,
+      );
+
+      // Check for compilation errors
+      if (compileResult.exitCode !== 0) {
+        const compilationError = compileResult.stderr || "Compilation failed";
+        // Return compilation error for all test cases
+        results = testCases.map((testCase) => ({
+          testCase,
+          status: "error" as const,
+          actual: null,
+          expected: testCase.expected,
+          error: `Compilation Error:\n${compilationError}`,
+        }));
+        return results;
+      }
+    }
+
     const limit = pLimit(getConcurrency(env));
     const settledResults = await Promise.allSettled(
       testCases.map((testCase, index) =>
@@ -72,7 +101,11 @@ export async function runUserSolution(
           await sandbox.uploadFile(Buffer.from(inputJson, "utf-8"), inputPath);
 
           // Execute the runner with unique input/output paths
-          const command = `${config.runCommand} runner.${config.extension} ${inputPath} ${outputPath}`;
+          // For C++, run the compiled binary; for others, use the interpreter/runtime
+          const command =
+            language === "cpp"
+              ? `${WORK_DIR}/runner ${inputPath} ${outputPath}`
+              : `${config.runCommand} runner.${config.extension} ${inputPath} ${outputPath}`;
           const result = await sandbox.executeCommand(command, WORK_DIR);
           console.log("result", JSON.stringify(result, null, 2));
 
@@ -281,6 +314,34 @@ export async function runUserSolutionWithCustomInputs(
       WORK_DIR,
     );
 
+    // For C++, compile the code first
+    if (language === "cpp") {
+      // Combine solution and runner into single file for compilation
+      const combinedCode = `${preparedUserCode}\n\n${runnerTemplate}`;
+      const combinedPath = `${WORK_DIR}/combined.cpp`;
+      await sandbox.uploadFile(Buffer.from(combinedCode, "utf-8"), combinedPath);
+
+      // Compile C++ code
+      const compileCommand = `g++ -std=c++17 -O2 -Wall -Wextra -I/usr/local/include ${combinedPath} -o ${WORK_DIR}/runner`;
+      const compileResult = await sandbox.executeCommand(
+        compileCommand,
+        WORK_DIR,
+      );
+
+      // Check for compilation errors
+      if (compileResult.exitCode !== 0) {
+        const compilationError = compileResult.stderr || "Compilation failed";
+        // Return compilation error for all custom inputs
+        const results: CustomTestResult[] = customInputs.map((input) => ({
+          input,
+          expected: null,
+          actual: null,
+          error: `Compilation Error:\n${compilationError}`,
+        }));
+        return results;
+      }
+    }
+
     const limit = pLimit(getConcurrency(env));
     const settledResults = await Promise.allSettled(
       customInputs.map((input, index) =>
@@ -307,7 +368,11 @@ export async function runUserSolutionWithCustomInputs(
           );
 
           // Run user solution
-          const command = `${config.runCommand} runner.${config.extension} ${inputPath} ${outputPath}`;
+          // For C++, run the compiled binary; for others, use the interpreter/runtime
+          const command =
+            language === "cpp"
+              ? `${WORK_DIR}/runner ${inputPath} ${outputPath}`
+              : `${config.runCommand} runner.${config.extension} ${inputPath} ${outputPath}`;
           const result = await sandbox.executeCommand(command, WORK_DIR);
           console.log("result", JSON.stringify(result, null, 2));
 
